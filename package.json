@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@fontsource/vazirmatn": "^5.2.8",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.18.0",
+    "tailwind-merge": "^3.6.0"
+  }
+}
