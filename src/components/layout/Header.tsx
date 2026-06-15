@@ -9,8 +9,8 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle }: HeaderProps) {
   return (
-    <header className="h-14 bg-surface border-b border-border px-6
-                       flex items-center justify-between sticky top-0 z-10">
+    <header className="h-14 bg-background border-b border-border px-6
+                   flex items-center justify-between sticky top-0 z-10">
 
       {/* عنوان صفحه */}
       <div>
