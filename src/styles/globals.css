@@ -1,0 +1,63 @@
+/* فونت Vazirmatn از Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap");
+
+/* Tailwind CSS v4 imports (جایگزین @tailwind directives) */
+@import "tailwindcss";
+
+/* متغیرهای سفارشی پروژه */
+@theme {
+  --color-bg: #ecf2fe;
+  --color-surface: #ffffff;
+  --color-border: #dce8fd;
+  --color-primary: #1e59f1;
+  --color-secondary: #c182f7;
+  --color-accent: #de4ef4;
+  --color-text: #000000;
+  --color-text-2: #666666;
+  --color-text-3: #999999;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  --font-vazir: "Vazirmatn", Tahoma, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-hover: 0 4px 12px rgba(30,89,241,0.08);
+}
+
+/* تنظیمات پایه */
+html {
+  direction: rtl;
+  background-color: var(--color-bg);
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-vazir);
+  color: var(--color-text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* اسکرولبار ظریف */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #dce8fd;
+  border-radius: 2px;
+}
+
+/* بلوک‌های کد همیشه LTR */
+pre, code {
+  direction: ltr;
+  text-align: left;
+  font-family: "Courier New", "Fira Code", monospace;
+}
