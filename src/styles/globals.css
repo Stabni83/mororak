@@ -41,7 +41,10 @@ body {
   color: var(--color-text);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+  background: linear-gradient(135deg, #eef4ff 0%, #f5f0ff 100%);
+  min-height: 100vh;
 }
+
 
 /* اسکرولبار ظریف */
 ::-webkit-scrollbar {
