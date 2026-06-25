@@ -1,50 +1,56 @@
 // Landing Page — صفحه اصلی سایت
-// این صفحه Server Component است (بدون "use client")
-// یعنی در سرور رندر می‌شود که برای SEO بهتر است
+// این صفحه Server Component نبود چون انیمیشن اسکرول نیاز به "use client" دارد
+"use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
+import Reveal from "@/components/ui/Reveal";
 import { SUBJECT_LABELS, type Subject } from "@/types";
+import {
+  Brain,
+  NotebookPen,
+  Zap,
+  Sigma,
+  Binary,
+  Cpu,
+  Network,
+  Mail,
+} from "lucide-react";
 
 // ─── داده‌های استاتیک ─────────────────────────
-// این‌ها بعداً از API یا دیتابیس می‌آیند
-// فعلاً hardcode کردیم
-
 const features = [
   {
-    icon: "🧠",
+    icon: Brain,
     title: "Active Recall",
     description: "با حل سوال یاد بگیر — روشی که علم اعصاب تأیید کرده",
-    color: "bg-primary/8",
+    color: "bg-primary/8 text-primary",
   },
   {
-    icon: "📝",
+    icon: NotebookPen,
     title: "پاسخ تشریحی",
     description: "هر سوال با توضیح کامل، کد نمونه، و مثال کاربردی",
-    color: "bg-secondary/10",
+    color: "bg-secondary/10 text-secondary",
   },
   {
-    icon: "⚡",
+    icon: Zap,
     title: "مرور سریع",
     description: "دروس سازماندهی‌شده برای مرور هدفمند قبل از امتحان",
-    color: "bg-accent/10",
+    color: "bg-accent/10 text-accent",
   },
 ] as const;
 
-const popularSubjects: { subject: Subject; icon: string; count: number }[] = [
-  { subject: "algorithm",       icon: "⚙️", count: 48 },
-  { subject: "data-structure",  icon: "🔢", count: 52 },
-  { subject: "os",              icon: "🖥️", count: 34 },
-  { subject: "network",         icon: "🌐", count: 28 },
+const popularSubjects: { subject: Subject; icon: typeof Sigma; count: number }[] = [
+  { subject: "algorithm", icon: Sigma, count: 48 },
+  { subject: "data-structure", icon: Binary, count: 52 },
+  { subject: "os", icon: Cpu, count: 34 },
+  { subject: "network", icon: Network, count: 28 },
 ];
 
 // ─── Navbar ───────────────────────────────────
 function Navbar() {
   return (
-    // bg-surface/80 — کمی شفاف
-    // backdrop-blur — blur پشت navbar
-    // sticky top-0 — چسبیده به بالا هنگام اسکرول
     <nav className="bg-surface/80 backdrop-blur-md border-b border-border
                     sticky top-0 z-50 px-6 lg:px-12">
       <div className="max-w-6xl mx-auto flex items-center justify-between h-14">
@@ -60,11 +66,11 @@ function Navbar() {
 
         {/* لینک‌های میانی */}
         <div className="hidden md:flex items-center gap-6">
-          <Link href="/notes"
+          <Link href="/dashboard/notes"
             className="text-sm text-text-secondary hover:text-primary transition-colors">
             جزوات
           </Link>
-          <Link href="/questions"
+          <Link href="/dashboard/questions"
             className="text-sm text-text-secondary hover:text-primary transition-colors">
             سوالات
           </Link>
@@ -74,12 +80,7 @@ function Navbar() {
           </Link>
         </div>
 
-        {/* دکمه‌های ورود و ثبت‌نام
-            ─────────────────────────────────────
-            مشکل قبلی: navbar سفید بود و دکمه primary هم سفید می‌شد
-            راه‌حل: دکمه ورود را به variant="ghost" تغییر دادیم
-            ghost = border آبی + متن آبی + بدون پس‌زمینه → همیشه روی هر رنگی دیده می‌شود
-            ─────────────────────────────────────── */}
+        {/* دکمه‌های ورود و ثبت‌نام */}
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm">
             <Link href="/login">ورود</Link>
@@ -97,12 +98,12 @@ function Navbar() {
 // ─── Hero Section ─────────────────────────────
 function HeroSection() {
   return (
-    <section className="px-6 lg:px-12 py-20 lg:py-28">
+    <section className="px-6 lg:px-12 py-20 lg:py-28 overflow-hidden">
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row
                       items-center gap-12">
 
         {/* متن Hero */}
-        <div className="flex-1 text-center lg:text-right">
+        <Reveal className="flex-1 text-center lg:text-right">
 
           {/* Badge بالای عنوان */}
           <div className="inline-flex mb-4">
@@ -129,21 +130,24 @@ function HeroSection() {
               <Link href="/signup">شروع رایگان</Link>
             </Button>
             <Button variant="ghost" size="lg">
-              <Link href="/questions">نمونه سوال</Link>
+              <Link href="/dashboard/questions">نمونه سوال</Link>
             </Button>
           </div>
-        </div>
+        </Reveal>
 
-        {/* تصویر Illustration */}
-        <div className="flex-shrink-0 w-72 h-64 lg:w-96 lg:h-80
-                        bg-primary/6 border-2 border-dashed border-primary/20
-                        rounded-2xl flex flex-col items-center justify-center gap-3">
-          <div className="text-6xl">📚</div>
-          <p className="text-sm text-text-muted font-medium">
-            Illustration آموزشی
-          </p>
-          {/* یادداشت برای خودت: اینجا یک SVG یا تصویر واقعی می‌گذاری */}
-        </div>
+        {/* تصویر کاراکتر — بدون قاب، بدون پس‌زمینه متفاوت */}
+        <Reveal delay={150} className="flex-shrink-0 w-72 lg:w-96">
+          <Image
+            src="/svg/student-character.svg"
+            alt="کاراکتر درسخون مرورک"
+            width={480}
+            height={480}
+            priority
+            className="w-full h-auto select-none pointer-events-none
+                       drop-shadow-[0_18px_30px_rgba(30,89,241,0.18)]
+                       animate-[float_5s_ease-in-out_infinite]"
+          />
+        </Reveal>
 
       </div>
     </section>
@@ -156,28 +160,32 @@ function FeaturesSection() {
     <section className="px-6 lg:px-12 py-16 bg-surface border-y border-border">
       <div className="max-w-6xl mx-auto">
 
-        <h2 className="text-xl font-bold text-center mb-10 text-text">
-          چرا مرورک؟
-        </h2>
+        <Reveal>
+          <h2 className="text-xl font-bold text-center mb-10 text-text">
+            چرا مرورک؟
+          </h2>
+        </Reveal>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="p-6 rounded-lg border border-border bg-background"
-            >
-              {/* آیکون */}
-              <div className={`w-10 h-10 ${feature.color} rounded-lg
-                              flex items-center justify-center text-xl mb-4`}>
-                {feature.icon}
-              </div>
+          {features.map((feature, i) => {
+            const Icon = feature.icon;
+            return (
+              <Reveal key={feature.title} delay={i * 120}>
+                <div className="p-6 rounded-lg border border-border bg-background h-full">
+                  {/* آیکون */}
+                  <div className={`w-10 h-10 ${feature.color} rounded-lg
+                                  flex items-center justify-center mb-4`}>
+                    <Icon size={20} strokeWidth={2.2} />
+                  </div>
 
-              <h3 className="text-base font-bold mb-2">{feature.title}</h3>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                {feature.description}
-              </p>
-            </div>
-          ))}
+                  <h3 className="text-base font-bold mb-2">{feature.title}</h3>
+                  <p className="text-sm text-text-secondary leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </Reveal>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -190,35 +198,38 @@ function CoursesSection() {
     <section className="px-6 lg:px-12 py-16">
       <div className="max-w-6xl mx-auto">
 
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-bold">دروس محبوب</h2>
-          <Link href="/notes"
-            className="text-sm text-primary font-semibold hover:opacity-80">
-            مشاهده همه ←
-          </Link>
-        </div>
+        <Reveal>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold">دروس محبوب</h2>
+            <Link href="/dashboard/notes"
+              className="text-sm text-primary font-semibold hover:opacity-80">
+              مشاهده همه ←
+            </Link>
+          </div>
+        </Reveal>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {popularSubjects.map(({ subject, icon, count }) => (
-            <Link
-              key={subject}
-              href={`/notes?subject=${subject}`}
-              className="flex items-center gap-3 p-4 bg-surface border border-border
-                         rounded-md hover:border-primary/30 hover:shadow-hover
-                         transition-all duration-150 group"
-            >
-              <div className="w-9 h-9 bg-primary/8 rounded-lg flex items-center
-                              justify-center text-lg flex-shrink-0">
-                {icon}
-              </div>
-              <div>
-                <div className="text-sm font-semibold group-hover:text-primary
-                                transition-colors">
-                  {SUBJECT_LABELS[subject]}
+          {popularSubjects.map(({ subject, icon: Icon, count }, i) => (
+            <Reveal key={subject} delay={i * 100}>
+              <Link
+                href={`/dashboard/notes?subject=${subject}`}
+                className="flex items-center gap-3 p-4 bg-surface border border-border
+                           rounded-md hover:border-primary/30 hover:shadow-hover
+                           transition-all duration-150 group"
+              >
+                <div className="w-9 h-9 bg-primary/8 rounded-lg flex items-center
+                                justify-center text-primary flex-shrink-0">
+                  <Icon size={18} strokeWidth={2.2} />
                 </div>
-                <div className="text-xs text-text-muted">{count} سوال</div>
-              </div>
-            </Link>
+                <div>
+                  <div className="text-sm font-semibold group-hover:text-primary
+                                  transition-colors">
+                    {SUBJECT_LABELS[subject]}
+                  </div>
+                  <div className="text-xs text-text-muted">{count} سوال</div>
+                </div>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -232,52 +243,58 @@ function SampleQuestion() {
     <section className="px-6 lg:px-12 py-16 bg-surface border-y border-border">
       <div className="max-w-2xl mx-auto">
 
-        <h2 className="text-xl font-bold text-center mb-8">یه سوال نمونه ببین</h2>
+        <Reveal>
+          <h2 className="text-xl font-bold text-center mb-8">یه سوال نمونه ببین</h2>
+        </Reveal>
 
-        <div className="border border-border rounded-lg p-6 bg-background">
-          <Badge variant="primary" className="mb-4">الگوریتم · متوسط</Badge>
+        <Reveal delay={100}>
+          <div className="border border-border rounded-lg p-6 bg-background">
+            <Badge variant="primary" className="mb-4">الگوریتم · متوسط</Badge>
 
-          <p className="text-base font-semibold mb-5 leading-relaxed">
-            پیچیدگی زمانی الگوریتم BFS روی گرافی با V راس و E یال چقدر است؟
-          </p>
+            <p className="text-base font-semibold mb-5 leading-relaxed">
+              پیچیدگی زمانی الگوریتم BFS روی گرافی با V راس و E یال چقدر است؟
+            </p>
 
-          <div className="flex flex-col gap-2.5">
-            {["O(V²)", "O(V + E)", "O(E log V)", "O(V log E)"].map(
-              (option, i) => {
-                const letters = ["الف", "ب", "ج", "د"];
-                const isCorrect = i === 1;
-                return (
-                  <div
-                    key={option}
-                    className={`flex items-center gap-3 p-3 rounded-md border
-                      ${isCorrect
-                        ? "border-success bg-green-50"
-                        : "border-border bg-surface"
-                      }`}
-                  >
-                    <span className={`w-6 h-6 rounded flex items-center justify-center
-                                    text-xs font-bold flex-shrink-0
-                                    ${isCorrect ? "bg-success text-white" : "border border-border text-text-muted"}`}>
-                      {letters[i]}
-                    </span>
-                    <span className="text-sm">{option}</span>
-                    {isCorrect && (
-                      <span className="mr-auto text-xs text-success font-semibold">
-                        ✓ درست
+            <div className="flex flex-col gap-2.5">
+              {["O(V²)", "O(V + E)", "O(E log V)", "O(V log E)"].map(
+                (option, i) => {
+                  const letters = ["الف", "ب", "ج", "د"];
+                  const isCorrect = i === 1;
+                  return (
+                    <div
+                      key={option}
+                      className={`flex items-center gap-3 p-3 rounded-md border
+                        ${isCorrect
+                          ? "border-success bg-green-50"
+                          : "border-border bg-surface"
+                        }`}
+                    >
+                      <span className={`w-6 h-6 rounded flex items-center justify-center
+                                      text-xs font-bold flex-shrink-0
+                                      ${isCorrect ? "bg-success text-white" : "border border-border text-text-muted"}`}>
+                        {letters[i]}
                       </span>
-                    )}
-                  </div>
-                );
-              }
-            )}
+                      <span className="text-sm">{option}</span>
+                      {isCorrect && (
+                        <span className="mr-auto text-xs text-success font-semibold">
+                          ✓ درست
+                        </span>
+                      )}
+                    </div>
+                  );
+                }
+              )}
+            </div>
           </div>
-        </div>
+        </Reveal>
 
-        <div className="text-center mt-8">
-          <Button variant="primary" size="lg">
-            <Link href="/signup">شروع با سوالات بیشتر</Link>
-          </Button>
-        </div>
+        <Reveal delay={200}>
+          <div className="text-center mt-8">
+            <Button variant="primary" size="lg">
+              <Link href="/signup">شروع با سوالات بیشتر</Link>
+            </Button>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -287,7 +304,7 @@ function SampleQuestion() {
 function CTASection() {
   return (
     <section className="px-6 lg:px-12 py-20">
-      <div className="max-w-2xl mx-auto text-center">
+      <Reveal className="max-w-2xl mx-auto text-center">
         <h2 className="text-2xl font-extrabold mb-3">
           آماده‌ای امتحانت رو با اعتماد بدی؟
         </h2>
@@ -297,13 +314,12 @@ function CTASection() {
         <Button variant="primary" size="lg">
           <Link href="/signup">ثبت نام رایگان — همین الان</Link>
         </Button>
-      </div>
+      </Reveal>
     </section>
   );
 }
 
 // ─── صفحه اصلی ────────────────────────────────
-// همه بخش‌ها را کنار هم می‌گذاریم
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
