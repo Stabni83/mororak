@@ -41,7 +41,6 @@ export default function RootLayout({
         />
       </head>
       <body className="font-vazir bg-background text-text antialiased">
-        {/* children = محتوای صفحه جاری */}
         {children}
       </body>
     </html>

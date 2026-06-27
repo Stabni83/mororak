@@ -136,12 +136,12 @@ function HeroSection() {
         </Reveal>
 
         {/* تصویر کاراکتر — بدون قاب، بدون پس‌زمینه متفاوت */}
-        <Reveal delay={150} className="flex-shrink-0 w-72 lg:w-96">
+        <Reveal delay={150} className="flex-shrink-0 w-80 lg:w-[30rem]">
           <Image
             src="/svg/student-character.svg"
             alt="کاراکتر درسخون مرورک"
-            width={480}
-            height={480}
+            width={640}
+            height={640}
             priority
             className="w-full h-auto select-none pointer-events-none
                        drop-shadow-[0_18px_30px_rgba(30,89,241,0.18)]
