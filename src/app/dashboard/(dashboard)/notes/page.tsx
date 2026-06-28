@@ -68,9 +68,9 @@ export default function NotesPage() {
     <div>
       <Header title="جزوات" subtitle="مطالعه و مرور مفاهیم" />
 
-      <div className="p-6">
+      <div className="p-6 max-w-5xl mx-auto">
         {/* ─── جستجوی بزرگ ─── */}
-        <div className="relative mb-6 max-w-2xl">
+        <div className="relative mb-6 max-w-2xl mx-auto">
           <Search
             size={18}
             className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
@@ -87,7 +87,7 @@ export default function NotesPage() {
         </div>
 
         {/* ─── چیپ‌های دسته‌بندی سریع (مکمل سایدبار) ─── */}
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
+        <div className="flex items-center justify-center gap-2 mb-6 overflow-x-auto pb-1">
           <button
             onClick={() => setActiveSubject("all")}
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${

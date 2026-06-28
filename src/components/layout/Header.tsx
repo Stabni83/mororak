@@ -13,9 +13,8 @@ export default function Header({ title, subtitle }: HeaderProps) {
   const { toggle } = useSidebar();
 
   return (
-      <header className="h-14 bg-bg border-b border-border
-                  px-4 flex items-center justify-between
-                  sticky top-0 z-50">
+    <header className="h-14 bg-bg border-b border-border px-4
+                       flex items-center justify-between sticky top-0 z-10">
 
       <div className="flex items-center gap-3">
         {/* دکمه همبرگر — فقط موبایل */}
@@ -36,16 +35,8 @@ export default function Header({ title, subtitle }: HeaderProps) {
         </div>
       </div>
 
-      {/* سمت چپ header — جستجو و آواتار */}
+      {/* سمت چپ header — آواتار */}
       <div className="flex items-center gap-3">
-
-        {/* باکس جستجو */}
-        <div className="flex items-center gap-2 bg-surface border border-border
-                        rounded-md px-3 py-1.5 text-sm text-text-muted
-                        hover:border-primary/30 transition-colors cursor-text">
-          <span className="text-xs">🔍</span>
-          <span>جستجو...</span>
-        </div>
 
         {/* آواتار کاربر */}
         <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20

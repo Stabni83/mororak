@@ -1,9 +1,9 @@
 "use client";
 
 // صفحه سوالات — مهم‌ترین صفحه پروژه
-// "use client" چون کاربر با گزینه‌ها تعامل می‌کند و state داریم
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -11,6 +11,7 @@ import CodeBlock from "@/components/ui/CodeBlock";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { cn, getSubjectColor } from "@/lib/utils";
 import { SUBJECT_LABELS, DIFFICULTY_LABELS, type Subject, type Difficulty } from "@/types";
+import { Search } from "lucide-react";
 
 // ─── داده نمونه یک سوال ──────────────────────
 // TODO: از API دریافت می‌شود
@@ -47,7 +48,6 @@ def bfs(graph: dict, start: str) -> list:
     return result  # پیچیدگی کل: O(V + E)`,
 };
 
-const subjects: Subject[] = ["algorithm", "data-structure", "os", "network", "database"];
 const difficulties: Difficulty[] = ["beginner", "intermediate", "advanced"];
 
 // ─── کامپوننت گزینه ──────────────────────────
@@ -55,7 +55,6 @@ interface OptionItemProps {
   id: string;
   text: string;
   letter: string;
-  // وضعیت: انتخاب‌شده، درست، اشتباه، یا عادی
   state: "default" | "selected" | "correct" | "wrong";
   onClick: () => void;
 }
@@ -68,16 +67,14 @@ function OptionItem({ id, text, letter, state, onClick }: OptionItemProps) {
       className={cn(
         "flex items-center gap-3 w-full p-3 rounded-md border text-right",
         "transition-all duration-150",
-        // استایل هر وضعیت
         state === "default"  && "border-border hover:border-primary/40 hover:bg-primary/3",
         state === "selected" && "border-primary bg-primary/5",
         state === "correct"  && "border-success bg-green-50",
         state === "wrong"    && "border-danger bg-red-50"
       )}
     >
-      {/* حرف گزینه */}
       <span className={cn(
-        "w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold flex-shrink-0",
+        "w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0",
         state === "default"  && "border border-border text-text-muted",
         state === "selected" && "border border-primary text-primary",
         state === "correct"  && "bg-success text-white",
@@ -88,7 +85,6 @@ function OptionItem({ id, text, letter, state, onClick }: OptionItemProps) {
 
       <span className="text-sm flex-1">{text}</span>
 
-      {/* نشانگر درست/اشتباه */}
       {state === "correct" && <span className="text-success text-xs font-bold">✓</span>}
       {state === "wrong"   && <span className="text-danger text-xs font-bold">✗</span>}
     </button>
@@ -97,15 +93,23 @@ function OptionItem({ id, text, letter, state, onClick }: OptionItemProps) {
 
 // ─── صفحه اصلی سوالات ────────────────────────
 export default function QuestionsPage() {
+  const searchParams = useSearchParams();
+  const subjectParam = searchParams.get("subject") as Subject | null;
+
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [personalNote, setPersonalNote] = useState("");
-  const [activeSubject, setActiveSubject] = useState<Subject | "all">("all");
+  const [activeSubject, setActiveSubject] = useState<Subject | "all">(subjectParam ?? "all");
+  const [search, setSearch] = useState("");
+
+  // وقتی از سایدبار subject جدید انتخاب می‌شود (تغییر URL)، state رو همگام کن
+  useEffect(() => {
+    setActiveSubject(subjectParam ?? "all");
+  }, [subjectParam]);
 
   const letters = ["الف", "ب", "ج", "د"];
 
-  // وضعیت هر گزینه را مشخص می‌کند
   function getOptionState(optionId: string): OptionItemProps["state"] {
     if (!showAnswer) {
       return selectedOption === optionId ? "selected" : "default";
@@ -116,12 +120,12 @@ export default function QuestionsPage() {
   }
 
   function handleSelectOption(optionId: string) {
-    if (showAnswer) return; // بعد از نمایش پاسخ قابل تغییر نیست
+    if (showAnswer) return;
     setSelectedOption(optionId);
   }
 
   function handleRevealAnswer() {
-    if (!selectedOption) return; // باید قبلاً گزینه انتخاب شده باشد
+    if (!selectedOption) return;
     setShowAnswer(true);
   }
 
@@ -131,178 +135,168 @@ export default function QuestionsPage() {
     <div>
       <Header title="سوالات" subtitle="الگوریتم — گراف" />
 
-      <div className="flex gap-0">
+      <div className="p-6 max-w-5xl mx-auto">
 
-        {/* ─── سایدبار فیلتر ─── */}
-        <aside className="w-48 min-h-screen border-l border-border bg-surface p-4 flex-shrink-0">
-          <p className="text-xs font-bold text-text-muted mb-4">فیلترها</p>
+        {/* ─── جستجوی بزرگ ─── */}
+        <div className="relative mb-6 max-w-2xl mx-auto">
+          <Search
+            size={18}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
+          />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="دنبال چه سوالی هستی؟"
+            className="w-full h-12 border border-border rounded-xl bg-surface
+                       pr-12 pl-4 text-sm placeholder:text-text-muted shadow-card
+                       focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10
+                       transition-all"
+          />
+        </div>
 
-          {/* فیلتر درس */}
-          <div className="mb-5">
-            <p className="text-xs font-semibold text-text-muted mb-2">درس</p>
-            <div className="flex flex-col gap-1">
-              <button
-                onClick={() => setActiveSubject("all")}
-                className={cn(
-                  "text-right px-2 py-1.5 rounded text-xs transition-colors",
-                  activeSubject === "all"
-                    ? "bg-primary/8 text-primary font-semibold"
-                    : "text-text-secondary hover:text-primary"
-                )}
+        {/* ─── چیپ‌های دسته‌بندی سریع (مکمل سایدبار) ─── */}
+        <div className="flex items-center justify-center gap-2 mb-4 overflow-x-auto pb-1">
+          <button
+            onClick={() => setActiveSubject("all")}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+              activeSubject === "all"
+                ? "bg-primary text-white"
+                : "bg-surface border border-border text-text-secondary hover:border-primary/40"
+            }`}
+          >
+            همه دروس
+          </button>
+          {(Object.keys(SUBJECT_LABELS) as Subject[]).map((subject) => (
+            <button
+              key={subject}
+              onClick={() => setActiveSubject(subject)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                activeSubject === subject
+                  ? "bg-primary text-white"
+                  : "bg-surface border border-border text-text-secondary hover:border-primary/40"
+              }`}
+            >
+              {SUBJECT_LABELS[subject]}
+            </button>
+          ))}
+        </div>
+
+        {/* ─── چیپ‌های سطح ─── */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <span className="text-xs text-text-muted shrink-0">سطح:</span>
+          {difficulties.map((d) => (
+            <button
+              key={d}
+              className="px-3 py-1 rounded-full text-xs border border-border
+                         text-text-secondary hover:border-primary/40 transition-colors"
+            >
+              {DIFFICULTY_LABELS[d]}
+            </button>
+          ))}
+        </div>
+
+        {/* header سوال */}
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <Badge variant="primary"
+              className={`${subjectColors.bg} ${subjectColors.text} border-0`}>
+              {SUBJECT_LABELS[sampleQuestion.subject]}
+            </Badge>
+            <Badge variant="neutral">
+              {DIFFICULTY_LABELS[sampleQuestion.difficulty]}
+            </Badge>
+            <span className="text-xs text-text-muted">سوال ۳ از ۲۸</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-text-muted">پیشرفت</span>
+            <ProgressBar value={35} showLabel className="w-24" />
+          </div>
+        </div>
+
+        {/* کارت سوال */}
+        <div className="bg-surface border border-border rounded-lg p-6">
+
+          <p className="text-base font-bold leading-relaxed mb-5">
+            {sampleQuestion.text}
+          </p>
+
+          <div className="flex flex-col gap-2.5 mb-5">
+            {sampleQuestion.options.map((option, i) => (
+              <OptionItem
+                key={option.id}
+                id={option.id}
+                text={option.text}
+                letter={letters[i]}
+                state={getOptionState(option.id)}
+                onClick={() => handleSelectOption(option.id)}
+              />
+            ))}
+          </div>
+
+          {showAnswer && (
+            <div className="border border-primary/20 bg-primary/3 rounded-md p-4 mb-4">
+              <p className="text-sm font-bold text-primary mb-2">✅ پاسخ تشریحی</p>
+              <p className="text-sm text-text-secondary leading-relaxed mb-3">
+                {sampleQuestion.explanation}
+              </p>
+              {sampleQuestion.codeExample && (
+                <CodeBlock
+                  code={sampleQuestion.codeExample}
+                  language="python"
+                  title="پیاده‌سازی BFS"
+                />
+              )}
+            </div>
+          )}
+
+          {showAnswer && (
+            <div className="mb-4">
+              <label className="text-xs font-semibold text-text-muted block mb-1.5">
+                یادداشت شخصی
+              </label>
+              <textarea
+                value={personalNote}
+                onChange={(e) => setPersonalNote(e.target.value)}
+                placeholder="نکته‌ای که می‌خوای یادت بمونه رو بنویس..."
+                rows={2}
+                className="w-full border border-border rounded-md p-3 text-sm
+                           bg-background text-text placeholder:text-text-muted
+                           focus:outline-none focus:border-primary/50 resize-none"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsSaved(!isSaved)}
+                className={isSaved ? "border-primary text-primary" : ""}
               >
-                همه دروس
-              </button>
-              {subjects.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setActiveSubject(s)}
-                  className={cn(
-                    "text-right px-2 py-1.5 rounded text-xs transition-colors",
-                    activeSubject === s
-                      ? "bg-primary/8 text-primary font-semibold"
-                      : "text-text-secondary hover:text-primary"
-                  )}
-                >
-                  {SUBJECT_LABELS[s]}
-                </button>
-              ))}
-            </div>
-          </div>
+                {isSaved ? "🔖 ذخیره شد" : "🔖 ذخیره"}
+              </Button>
 
-          {/* فیلتر سطح */}
-          <div>
-            <p className="text-xs font-semibold text-text-muted mb-2">سطح</p>
-            <div className="flex flex-col gap-1">
-              {difficulties.map((d) => (
-                <button
-                  key={d}
-                  className="text-right px-2 py-1.5 rounded text-xs
-                             text-text-secondary hover:text-primary transition-colors"
-                >
-                  {DIFFICULTY_LABELS[d]}
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* ─── محتوای اصلی ─── */}
-        <main className="flex-1 p-6">
-
-          {/* header سوال */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Badge variant="primary"
-                className={`${subjectColors.bg} ${subjectColors.text} border-0`}>
-                {SUBJECT_LABELS[sampleQuestion.subject]}
-              </Badge>
-              <Badge variant="neutral">
-                {DIFFICULTY_LABELS[sampleQuestion.difficulty]}
-              </Badge>
-              <span className="text-xs text-text-muted">سوال ۳ از ۲۸</span>
-            </div>
-
-            {/* نوار پیشرفت */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-text-muted">پیشرفت</span>
-              <ProgressBar value={35} showLabel className="w-24" />
-            </div>
-          </div>
-
-          {/* کارت سوال */}
-          <div className="bg-surface border border-border rounded-lg p-6">
-
-            {/* متن سوال */}
-            <p className="text-base font-bold leading-relaxed mb-5">
-              {sampleQuestion.text}
-            </p>
-
-            {/* گزینه‌ها */}
-            <div className="flex flex-col gap-2.5 mb-5">
-              {sampleQuestion.options.map((option, i) => (
-                <OptionItem
-                  key={option.id}
-                  id={option.id}
-                  text={option.text}
-                  letter={letters[i]}
-                  state={getOptionState(option.id)}
-                  onClick={() => handleSelectOption(option.id)}
-                />
-              ))}
-            </div>
-
-            {/* ─── پاسخ تشریحی ─── */}
-            {/* showAnswer با انیمیشن ظاهر می‌شود */}
-            {showAnswer && (
-              <div className="border border-primary/20 bg-primary/3 rounded-md p-4 mb-4">
-                <p className="text-sm font-bold text-primary mb-2">✅ پاسخ تشریحی</p>
-                <p className="text-sm text-text-secondary leading-relaxed mb-3">
-                  {sampleQuestion.explanation}
-                </p>
-                {/* کد نمونه */}
-                {sampleQuestion.codeExample && (
-                  <CodeBlock
-                    code={sampleQuestion.codeExample}
-                    language="python"
-                    title="پیاده‌سازی BFS"
-                  />
-                )}
-              </div>
-            )}
-
-            {/* ─── یادداشت شخصی ─── */}
-            {showAnswer && (
-              <div className="mb-4">
-                <label className="text-xs font-semibold text-text-muted block mb-1.5">
-                  یادداشت شخصی
-                </label>
-                <textarea
-                  value={personalNote}
-                  onChange={(e) => setPersonalNote(e.target.value)}
-                  placeholder="نکته‌ای که می‌خوای یادت بمونه رو بنویس..."
-                  rows={2}
-                  className="w-full border border-border rounded-md p-3 text-sm
-                             bg-background text-text placeholder:text-text-muted
-                             focus:outline-none focus:border-primary/50 resize-none"
-                />
-              </div>
-            )}
-
-            {/* ─── دکمه‌های اکشن ─── */}
-            <div className="flex items-center justify-between">
-              <div className="flex gap-2">
-                {/* دکمه ذخیره */}
+              {!showAnswer && (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setIsSaved(!isSaved)}
-                  className={isSaved ? "border-primary text-primary" : ""}
+                  onClick={handleRevealAnswer}
+                  disabled={!selectedOption}
                 >
-                  {isSaved ? "🔖 ذخیره شد" : "🔖 ذخیره"}
+                  مشاهده پاسخ
                 </Button>
-
-                {/* دکمه نمایش پاسخ — فقط وقتی گزینه انتخاب شده */}
-                {!showAnswer && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRevealAnswer}
-                    disabled={!selectedOption}
-                  >
-                    مشاهده پاسخ
-                  </Button>
-                )}
-              </div>
-
-              {/* ناوبری سوالات */}
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">← قبلی</Button>
-                <Button variant="primary" size="sm">بعدی ←</Button>
-              </div>
+              )}
             </div>
 
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">← قبلی</Button>
+              <Button variant="primary" size="sm">بعدی ←</Button>
+            </div>
           </div>
-        </main>
+
+        </div>
       </div>
     </div>
   );

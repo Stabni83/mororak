@@ -7,7 +7,9 @@ import Link from "next/link";
 import { SUBJECT_LABELS, type Subject } from "@/types";
 import { getSubjectColor } from "@/lib/utils";
 import ActivityChart from "@/components/dashboard/ActivityChart";
+import { Search, BookOpenCheck } from "lucide-react";
 
+// ─── داده‌های نمونه ───────────────────────────
 const recentNotes = [
   { id: "1", title: "مرتب‌سازی — QuickSort", subject: "algorithm" as Subject },
   { id: "2", title: "صف و پشته",             subject: "data-structure" as Subject },
@@ -26,12 +28,13 @@ const suggestedCourses = [
   { title: "Hashing",          subject: "data-structure" as Subject, count: 18 },
 ];
 
+// ─── کامپوننت ادامه یادگیری ──────────────────
 function ContinueLearning() {
   return (
     <Card className="flex items-center gap-4 mb-5">
       <div className="w-12 h-12 bg-primary/8 rounded-xl flex items-center
                       justify-center text-2xl flex-shrink-0">
-        ⚡
+        <BookOpenCheck size={22} strokeWidth={1.5} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-text-muted mb-0.5">ادامه بده</p>
@@ -40,7 +43,7 @@ function ContinueLearning() {
         <ProgressBar value={65} showLabel className="mt-2" />
       </div>
       <Button variant="primary" size="sm" className="flex-shrink-0">
-        <Link href="/questions">ادامه ←</Link>
+        <Link href="/dashboard/questions">ادامه ←</Link>
       </Button>
     </Card>
   );
@@ -59,23 +62,43 @@ function ListItem({ title, subject }: { title: string; subject: Subject }) {
   );
 }
 
+// ─── صفحه داشبورد ─────────────────────────────
 export default function DashboardPage() {
   return (
     <div>
       <Header title="داشبورد" subtitle="سلام، علی 👋" />
-      <div className="p-6">
+
+      <div className="p-6 max-w-5xl mx-auto">
+
+        {/* ─── جستجوی بزرگ — هماهنگ با صفحات جزوات/سوالات ─── */}
+        <div className="relative mb-6 max-w-2xl mx-auto">
+          <Search
+            size={18}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
+          />
+          <input
+            placeholder="دنبال چه چیزی هستی؟ (جزوه، سوال، درس...)"
+            className="w-full h-12 border border-border rounded-xl bg-surface
+                       pr-12 pl-4 text-sm placeholder:text-text-muted shadow-card
+                       focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10
+                       transition-all"
+          />
+        </div>
+
         <ActivityChart />
         <ContinueLearning />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Card>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold">آخرین جزوات</h2>
-              <Link href="/notes" className="text-xs text-primary font-semibold">همه</Link>
+              <Link href="/dashboard/notes" className="text-xs text-primary font-semibold">همه</Link>
             </div>
             {recentNotes.map((note) => (
               <ListItem key={note.id} title={note.title} subject={note.subject} />
             ))}
           </Card>
+
           <Card>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold">سوالات ذخیره‌شده</h2>
@@ -86,13 +109,14 @@ export default function DashboardPage() {
             ))}
           </Card>
         </div>
+
         <Card>
           <h2 className="text-sm font-bold mb-3">درس‌های پیشنهادی</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {suggestedCourses.map((course) => (
               <Link
                 key={course.title}
-                href={`/notes?subject=${course.subject}`}
+                href={`/dashboard/notes?subject=${course.subject}`}
                 className="p-3 bg-background border border-border rounded-md
                            hover:border-primary/30 transition-all"
               >
@@ -104,6 +128,7 @@ export default function DashboardPage() {
             ))}
           </div>
         </Card>
+
       </div>
     </div>
   );
