@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
-import { cn, getSubjectColor } from "@/lib/utils";
+import { getSubjectColor } from "@/lib/utils";
 import { SUBJECT_LABELS, type Subject } from "@/types";
+import { Search, Clock, HelpCircle } from "lucide-react";
 
 // ─── داده نمونه ──────────────────────────────
 const notes = [
@@ -17,22 +19,12 @@ const notes = [
   { id: "6", title: "نرمال‌سازی",          subject: "database" as Subject,      readingTime: 5, questionCount: 8,  preview: "1NF تا 3NF با مثال‌های کاربردی و تمرین" },
 ];
 
-const subjectCounts: Record<Subject | "all", number> = {
-  all: notes.length,
-  algorithm: notes.filter(n => n.subject === "algorithm").length,
-  "data-structure": notes.filter(n => n.subject === "data-structure").length,
-  os: notes.filter(n => n.subject === "os").length,
-  network: notes.filter(n => n.subject === "network").length,
-  database: notes.filter(n => n.subject === "database").length,
-};
-
 // ─── کامپوننت کارت جزوه ──────────────────────
 function NoteCard({ note }: { note: typeof notes[0] }) {
   const colors = getSubjectColor(note.subject);
 
   return (
     <Card hoverable padding="md">
-      {/* تگ موضوع */}
       <Badge className={`${colors.bg} ${colors.text} border-0 mb-3`}>
         {SUBJECT_LABELS[note.subject]}
       </Badge>
@@ -40,11 +32,12 @@ function NoteCard({ note }: { note: typeof notes[0] }) {
       <h3 className="text-sm font-bold mb-1.5 leading-snug">{note.title}</h3>
       <p className="text-xs text-text-muted leading-relaxed mb-3">{note.preview}</p>
 
-      {/* footer کارت */}
       <div className="flex items-center justify-between pt-2 border-t border-border">
-        <span className="text-xs text-text-muted">⏱ {note.readingTime} دقیقه</span>
-        <span className="text-xs text-primary font-semibold">
-          {note.questionCount} سوال
+        <span className="text-xs text-text-muted flex items-center gap-1">
+          <Clock size={12} /> {note.readingTime} دقیقه
+        </span>
+        <span className="text-xs text-primary font-semibold flex items-center gap-1">
+          <HelpCircle size={12} /> {note.questionCount} سوال
         </span>
       </div>
     </Card>
@@ -53,10 +46,17 @@ function NoteCard({ note }: { note: typeof notes[0] }) {
 
 // ─── صفحه جزوات ──────────────────────────────
 export default function NotesPage() {
-  const [activeSubject, setActiveSubject] = useState<Subject | "all">("all");
+  const searchParams = useSearchParams();
+  const subjectParam = searchParams.get("subject") as Subject | null;
+
+  const [activeSubject, setActiveSubject] = useState<Subject | "all">(subjectParam ?? "all");
   const [search, setSearch] = useState("");
 
-  // فیلتر کردن جزوات بر اساس subject و جستجو
+  // وقتی از سایدبار subject جدید انتخاب می‌شود (تغییر URL)، state رو همگام کن
+  useEffect(() => {
+    setActiveSubject(subjectParam ?? "all");
+  }, [subjectParam]);
+
   const filtered = notes.filter((note) => {
     const matchesSubject = activeSubject === "all" || note.subject === activeSubject;
     const matchesSearch =
@@ -68,83 +68,73 @@ export default function NotesPage() {
     <div>
       <Header title="جزوات" subtitle="مطالعه و مرور مفاهیم" />
 
-      <div className="flex">
-
-        {/* ─── سایدبار دسته‌بندی ─── */}
-        <aside className="w-52 min-h-screen border-l border-border bg-surface p-4 flex-shrink-0">
-
-          {/* جستجو */}
+      <div className="p-6">
+        {/* ─── جستجوی بزرگ ─── */}
+        <div className="relative mb-6 max-w-2xl">
+          <Search
+            size={18}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
+          />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="جستجو..."
-            className="w-full h-9 border border-border rounded-md bg-background
-                       px-3 text-xs placeholder:text-text-muted
-                       focus:outline-none focus:border-primary/50 mb-4"
+            placeholder="دنبال چه جزوه‌ای هستی؟"
+            className="w-full h-12 border border-border rounded-xl bg-surface
+                       pr-12 pl-4 text-sm placeholder:text-text-muted shadow-card
+                       focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10
+                       transition-all"
           />
+        </div>
 
-          <p className="text-xs font-bold text-text-muted mb-2">دسته‌بندی</p>
-
-          {/* آیتم همه */}
+        {/* ─── چیپ‌های دسته‌بندی سریع (مکمل سایدبار) ─── */}
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
           <button
             onClick={() => setActiveSubject("all")}
-            className={cn(
-              "w-full flex items-center justify-between px-2 py-2 rounded text-xs mb-1",
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
               activeSubject === "all"
-                ? "bg-primary/8 text-primary font-semibold"
-                : "text-text-secondary hover:text-primary"
-            )}
+                ? "bg-primary text-white"
+                : "bg-surface border border-border text-text-secondary hover:border-primary/40"
+            }`}
           >
-            <span>همه جزوات</span>
-            <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded font-bold">
-              {subjectCounts.all}
-            </span>
+            همه
           </button>
-
-          {/* آیتم‌های درس */}
           {(Object.keys(SUBJECT_LABELS) as Subject[]).map((subject) => (
             <button
               key={subject}
               onClick={() => setActiveSubject(subject)}
-              className={cn(
-                "w-full flex items-center justify-between px-2 py-2 rounded text-xs mb-1",
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 activeSubject === subject
-                  ? "bg-primary/8 text-primary font-semibold"
-                  : "text-text-secondary hover:text-primary"
-              )}
+                  ? "bg-primary text-white"
+                  : "bg-surface border border-border text-text-secondary hover:border-primary/40"
+              }`}
             >
-              <span>{SUBJECT_LABELS[subject]}</span>
-              <span className="bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded font-bold">
-                {subjectCounts[subject]}
-              </span>
+              {SUBJECT_LABELS[subject]}
             </button>
           ))}
-        </aside>
+        </div>
 
-        {/* ─── محتوای اصلی — گرید جزوات ─── */}
-        <main className="flex-1 p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-base font-bold">
-              {activeSubject === "all" ? "همه جزوات" : SUBJECT_LABELS[activeSubject]}
-            </h2>
-            <span className="text-xs text-text-muted">{filtered.length} جزوه</span>
+        {/* ─── هدر نتایج ─── */}
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base font-bold">
+            {activeSubject === "all" ? "همه جزوات" : SUBJECT_LABELS[activeSubject]}
+          </h2>
+          <span className="text-xs text-text-muted">{filtered.length} جزوه</span>
+        </div>
+
+        {/* ─── گرید جزوات ─── */}
+        {filtered.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map((note) => (
+              <NoteCard key={note.id} note={note} />
+            ))}
           </div>
-
-          {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map((note) => (
-                <NoteCard key={note.id} note={note} />
-              ))}
-            </div>
-          ) : (
-            // حالت خالی — وقتی نتیجه‌ای نیست
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="text-4xl mb-3">🔍</div>
-              <p className="text-sm font-semibold mb-1">نتیجه‌ای پیدا نشد</p>
-              <p className="text-xs text-text-muted">جستجوی دیگری امتحان کن</p>
-            </div>
-          )}
-        </main>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <Search size={36} className="text-text-muted mb-3" />
+            <p className="text-sm font-semibold mb-1">نتیجه‌ای پیدا نشد</p>
+            <p className="text-xs text-text-muted">جستجوی دیگری امتحان کن</p>
+          </div>
+        )}
       </div>
     </div>
   );
