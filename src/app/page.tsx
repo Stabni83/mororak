@@ -18,6 +18,7 @@ import {
   Network,
   Mail,
 } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 
 // ─── داده‌های استاتیک ─────────────────────────
 const features = [
@@ -55,12 +56,8 @@ function Navbar() {
                     sticky top-0 z-50 px-6 lg:px-12">
       <div className="max-w-6xl mx-auto flex items-center justify-between h-14">
 
-        {/* لوگو */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-primary rounded-lg flex items-center
-                          justify-center text-white text-sm font-bold">
-            م
-          </div>
+          <Logo size="sm" />
           <span className="text-base font-bold text-primary">مرورک</span>
         </Link>
 

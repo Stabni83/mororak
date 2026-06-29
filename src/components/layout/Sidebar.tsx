@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/context/SidebarContext";
 import { SUBJECT_LABELS, type Subject } from "@/types";
+import Logo from "@/components/ui/Logo";
 import {
   Home,
   HelpCircle,
@@ -18,7 +19,6 @@ interface NavItem {
   label: string;
   href: string;
   icon: typeof Home;
-  // اگر این مسیر دسته‌بندی هم دارد (جزوات/سوالات)
   hasCategories?: boolean;
 }
 
@@ -36,10 +36,8 @@ export default function Sidebar() {
   const router = useRouter();
   const { isOpen, close } = useSidebar();
 
-  // کدوم آیتم‌ها باز هستن (می‌توان چندتا با هم باز باشد)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  // وقتی مسیر فعلی روی یک آیتم دارای دسته‌بندی است، خودکار بازش کن
   useEffect(() => {
     navItems.forEach((item) => {
       if (item.hasCategories && pathname.startsWith(item.href)) {
@@ -52,7 +50,6 @@ export default function Sidebar() {
     setExpanded((prev) => ({ ...prev, [href]: !prev[href] }));
   }
 
-  // وقتی روی دسته‌بندی زیرمنو کلیک می‌شود — به صفحه با query param subject می‌رویم
   function goToSubject(basePath: string, subject: Subject | "all") {
     const query = subject === "all" ? "" : `?subject=${subject}`;
     router.push(`${basePath}${query}`);
@@ -61,7 +58,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Overlay — فقط موبایل */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-20 lg:hidden"
@@ -80,13 +76,10 @@ export default function Sidebar() {
       >
         {/* لوگو */}
         <div className="flex items-center gap-2.5 px-4 h-14 border-b border-border shrink-0">
-          <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center text-white text-sm font-bold">
-            م
-          </div>
+          <Logo size="sm" />
           <span className="text-base font-bold text-primary">مرورک</span>
         </div>
 
-        {/* منو */}
         <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -95,7 +88,6 @@ export default function Sidebar() {
 
             return (
               <div key={item.href}>
-                {/* ردیف اصلی آیتم */}
                 <div className="flex items-center">
                   <Link
                     href={item.href}
@@ -111,7 +103,6 @@ export default function Sidebar() {
                     {item.label}
                   </Link>
 
-                  {/* دکمه باز/بسته‌کردن زیرمنو */}
                   {item.hasCategories && (
                     <button
                       onClick={() => toggleExpand(item.href)}
@@ -130,7 +121,6 @@ export default function Sidebar() {
                   )}
                 </div>
 
-                {/* زیرمنوی دسته‌بندی — فقط برای سوالات/جزوات */}
                 {item.hasCategories && (
                   <div
                     className={cn(

@@ -11,7 +11,7 @@ import CodeBlock from "@/components/ui/CodeBlock";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { cn, getSubjectColor } from "@/lib/utils";
 import { SUBJECT_LABELS, DIFFICULTY_LABELS, type Subject, type Difficulty } from "@/types";
-import { Search } from "lucide-react";
+import { Search, CheckCircle2, Bookmark, Check, X } from "lucide-react";
 
 // ─── داده نمونه یک سوال ──────────────────────
 // TODO: از API دریافت می‌شود
@@ -85,8 +85,8 @@ function OptionItem({ id, text, letter, state, onClick }: OptionItemProps) {
 
       <span className="text-sm flex-1">{text}</span>
 
-      {state === "correct" && <span className="text-success text-xs font-bold">✓</span>}
-      {state === "wrong"   && <span className="text-danger text-xs font-bold">✗</span>}
+      {state === "correct" && <Check size={14} className="text-success" strokeWidth={3} />}
+      {state === "wrong"   && <X size={14} className="text-danger" strokeWidth={3} />}
     </button>
   );
 }
@@ -236,7 +236,9 @@ export default function QuestionsPage() {
 
           {showAnswer && (
             <div className="border border-primary/20 bg-primary/3 rounded-md p-4 mb-4">
-              <p className="text-sm font-bold text-primary mb-2">✅ پاسخ تشریحی</p>
+              <p className="text-sm font-bold text-primary mb-2 flex items-center gap-1.5">
+                <CheckCircle2 size={16} /> پاسخ تشریحی
+              </p>
               <p className="text-sm text-text-secondary leading-relaxed mb-3">
                 {sampleQuestion.explanation}
               </p>
@@ -275,7 +277,10 @@ export default function QuestionsPage() {
                 onClick={() => setIsSaved(!isSaved)}
                 className={isSaved ? "border-primary text-primary" : ""}
               >
-                {isSaved ? "🔖 ذخیره شد" : "🔖 ذخیره"}
+                <span className="flex items-center gap-1.5">
+                  <Bookmark size={14} fill={isSaved ? "currentColor" : "none"} />
+                  {isSaved ? "ذخیره شد" : "ذخیره"}
+                </span>
               </Button>
 
               {!showAnswer && (

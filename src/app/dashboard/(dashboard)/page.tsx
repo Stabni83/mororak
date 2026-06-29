@@ -7,7 +7,7 @@ import Link from "next/link";
 import { SUBJECT_LABELS, type Subject } from "@/types";
 import { getSubjectColor } from "@/lib/utils";
 import ActivityChart from "@/components/dashboard/ActivityChart";
-import { Search, BookOpenCheck } from "lucide-react";
+import { Search, Zap } from "lucide-react";
 
 // ─── داده‌های نمونه ───────────────────────────
 const recentNotes = [
@@ -32,9 +32,9 @@ const suggestedCourses = [
 function ContinueLearning() {
   return (
     <Card className="flex items-center gap-4 mb-5">
-      <div className="w-12 h-12 bg-primary/8 rounded-xl flex items-center
-                      justify-center text-2xl flex-shrink-0">
-        <BookOpenCheck size={22} strokeWidth={1.5} />
+      <div className="w-12 h-12 bg-primary/8 text-primary rounded-xl flex items-center
+                      justify-center flex-shrink-0">
+        <Zap size={22} strokeWidth={2.2} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-text-muted mb-0.5">ادامه بده</p>
@@ -66,7 +66,7 @@ function ListItem({ title, subject }: { title: string; subject: Subject }) {
 export default function DashboardPage() {
   return (
     <div>
-      <Header title="داشبورد" subtitle="سلام، علی 👋" />
+      <Header title="داشبورد" subtitle="سلام، علی " />
 
       <div className="p-6 max-w-5xl mx-auto">
 

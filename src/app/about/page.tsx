@@ -5,6 +5,7 @@ import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
 import { Target, Brain, BookOpen, Flag, Mail } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 
 const aboutBlocks = [
   { icon: Target,    title: "هدف ما",            text: "یادگیری عمیق‌تر با روش‌های علمی به جای حفظ‌کردن مطالب" },
@@ -19,17 +20,16 @@ export default function AboutPage() {
       <div className="max-w-xl mx-auto">
 
         {/* لوگو و عنوان */}
-        <Reveal className="text-center mb-10">
-          <div className="w-14 h-14 bg-primary rounded-2xl flex items-center
-                          justify-center text-white text-2xl font-extrabold
-                          mx-auto mb-4">
-            م
-          </div>
-          <h1 className="text-2xl font-extrabold mb-2">درباره مرورک</h1>
-          <p className="text-sm text-text-secondary leading-relaxed">
-            پلتفرم فارسی یادگیری مهندسی کامپیوتر بر پایه Active Recall
-          </p>
-        </Reveal>
+      <Reveal className="text-center mb-10">
+        
+        <Logo size="lg" className="mx-auto mb-4" />
+        
+        <h1 className="text-2xl font-extrabold mb-2">درباره مرورک</h1>
+        
+        <p className="text-sm text-text-secondary leading-relaxed">
+          پلتفرم فارسی یادگیری مهندسی کامپیوتر بر پایه Active Recall
+        </p>
+      </Reveal>
 
         {/* بلوک‌های معرفی */}
         <div className="grid grid-cols-2 gap-3 mb-6">

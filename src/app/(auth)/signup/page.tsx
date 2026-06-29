@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import Logo from "@/components/ui/Logo";
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -15,8 +16,6 @@ export default function SignupPage() {
 
   const [errors, setErrors] = useState<Partial<typeof form>>({});
 
-  // تابع کمکی برای update هر فیلد
-  // به جای ۴ تابع جداگانه، یک تابع generic داریم
   function handleChange(field: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -25,13 +24,11 @@ export default function SignupPage() {
 
   function validate(): boolean {
     const newErrors: Partial<typeof form> = {};
-
     if (form.name.trim().length < 2) newErrors.name = "نام باید حداقل ۲ کاراکتر باشد";
     if (!form.email.includes("@")) newErrors.email = "ایمیل نامعتبر است";
     if (form.password.length < 8) newErrors.password = "حداقل ۸ کاراکتر";
     if (form.password !== form.confirmPassword)
       newErrors.confirmPassword = "رمزهای عبور یکسان نیستند";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -45,21 +42,20 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-surface border border-border rounded-xl
-                      shadow-card p-8">
+      <div className="w-full max-w-2xl bg-surface border border-border rounded-xl
+                      shadow-card p-10 lg:p-14 flex flex-col items-center text-center">
 
-        <Link href="/" className="flex items-center gap-2 mb-8">
-          <div className="w-7 h-7 bg-primary rounded-lg flex items-center
-                          justify-center text-white text-sm font-bold">م</div>
+        <Link href="/" className="flex items-center justify-center gap-2 mb-8">
+          <Logo size="sm" />
           <span className="font-bold text-primary">مرورک</span>
         </Link>
 
-        <h1 className="text-xl font-extrabold mb-1">شروع رایگان 🚀</h1>
-        <p className="text-sm text-text-secondary mb-6">
+        <h1 className="text-2xl font-extrabold mb-1">شروع رایگان</h1>
+        <p className="text-sm text-text-secondary mb-8">
           حساب بساز و یادگیریت رو همین الان شروع کن
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm text-right">
           <Input
             label="نام و نام خانوادگی"
             name="name"
@@ -102,7 +98,7 @@ export default function SignupPage() {
           </Button>
         </form>
 
-        <p className="text-center text-xs text-text-muted mt-5">
+        <p className="text-center text-xs text-text-muted mt-6">
           قبلاً ثبت نام کردی؟{" "}
           <Link href="/login" className="text-primary font-semibold">وارد شو</Link>
         </p>
