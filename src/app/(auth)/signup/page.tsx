@@ -5,6 +5,13 @@ import Link from "next/link";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Logo from "@/components/ui/Logo";
+import { Brain, Zap, Trophy } from "lucide-react";
+
+const perks = [
+  { icon: Brain,  text: "یادگیری با روش Active Recall" },
+  { icon: Zap,    text: "مرور سریع قبل از امتحان" },
+  { icon: Trophy, text: "بیش از ۵۰۰ سوال تشریحی" },
+];
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -42,66 +49,91 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-surface border border-border rounded-xl
-                      shadow-card p-10 lg:p-14 flex flex-col items-center text-center">
+      <div className="w-full max-w-4xl bg-surface border border-border
+                      rounded-xl shadow-card overflow-hidden flex">
 
-        <Link href="/" className="flex items-center justify-center gap-2 mb-8">
-          <Logo size="sm" />
-          <span className="font-bold text-primary">مرورک</span>
-        </Link>
+        {/* ─── ستون راست — فرم ─── */}
+        <div className="flex-1 p-10 lg:p-14 flex flex-col items-center text-center">
 
-        <h1 className="text-2xl font-extrabold mb-1">شروع رایگان</h1>
-        <p className="text-sm text-text-secondary mb-8">
-          حساب بساز و یادگیریت رو همین الان شروع کن
-        </p>
+          <Link href="/" className="flex items-center justify-center gap-2 mb-8">
+            <Logo size="sm" />
+            <span className="font-bold text-primary">مرورک</span>
+          </Link>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm text-right">
-          <Input
-            label="نام و نام خانوادگی"
-            name="name"
-            placeholder="علی احمدی"
-            value={form.name}
-            onChange={handleChange("name")}
-            error={errors.name}
-          />
-          <Input
-            label="ایمیل"
-            type="email"
-            name="email"
-            placeholder="example@email.com"
-            value={form.email}
-            onChange={handleChange("email")}
-            error={errors.email}
-          />
-          <Input
-            label="رمز عبور"
-            type="password"
-            name="password"
-            placeholder="حداقل ۸ کاراکتر"
-            value={form.password}
-            onChange={handleChange("password")}
-            error={errors.password}
-            hint="از حروف بزرگ، کوچک و عدد استفاده کن"
-          />
-          <Input
-            label="تکرار رمز عبور"
-            type="password"
-            name="confirmPassword"
-            placeholder="••••••••"
-            value={form.confirmPassword}
-            onChange={handleChange("confirmPassword")}
-            error={errors.confirmPassword}
-          />
+          <h1 className="text-2xl font-extrabold mb-1">شروع رایگان</h1>
+          <p className="text-sm text-text-secondary mb-8">
+            حساب بساز و یادگیریت رو همین الان شروع کن
+          </p>
 
-          <Button type="submit" variant="primary" fullWidth className="mt-1">
-            ساخت حساب کاربری
-          </Button>
-        </form>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm text-right">
+            <Input
+              label="نام و نام خانوادگی"
+              name="name"
+              placeholder="علی احمدی"
+              value={form.name}
+              onChange={handleChange("name")}
+              error={errors.name}
+            />
+            <Input
+              label="ایمیل"
+              type="email"
+              name="email"
+              placeholder="example@email.com"
+              value={form.email}
+              onChange={handleChange("email")}
+              error={errors.email}
+            />
+            <Input
+              label="رمز عبور"
+              type="password"
+              name="password"
+              placeholder="حداقل ۸ کاراکتر"
+              value={form.password}
+              onChange={handleChange("password")}
+              error={errors.password}
+              hint="از حروف بزرگ، کوچک و عدد استفاده کن"
+            />
+            <Input
+              label="تکرار رمز عبور"
+              type="password"
+              name="confirmPassword"
+              placeholder="••••••••"
+              value={form.confirmPassword}
+              onChange={handleChange("confirmPassword")}
+              error={errors.confirmPassword}
+            />
 
-        <p className="text-center text-xs text-text-muted mt-6">
-          قبلاً ثبت نام کردی؟{" "}
-          <Link href="/login" className="text-primary font-semibold">وارد شو</Link>
-        </p>
+            <Button type="submit" variant="primary" fullWidth className="mt-1">
+              ساخت حساب کاربری
+            </Button>
+          </form>
+
+          <p className="text-center text-xs text-text-muted mt-6">
+            قبلاً ثبت نام کردی؟{" "}
+            <Link href="/login" className="text-primary font-semibold">وارد شو</Link>
+          </p>
+        </div>
+
+        {/* ─── ستون چپ — تزئینی (مثل لاگین) ─── */}
+        <div className="hidden lg:flex w-80 bg-background border-r border-border
+                        flex-col items-center justify-center gap-6 p-10 text-center">
+
+          <p className="text-sm font-bold text-text mb-2">چرا مرورک؟</p>
+
+          <div className="flex flex-col gap-4 w-full">
+            {perks.map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-3 text-right">
+                <div className="w-9 h-9 rounded-lg bg-primary/8 text-primary
+                                flex items-center justify-center shrink-0">
+                  <Icon size={16} strokeWidth={2.2} />
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed">{text}</p>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
       </div>
     </div>
   );

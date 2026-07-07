@@ -64,7 +64,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
             />
-            <div className="flex justify-end">
+            <div className="flex justify-center">
               <Link href="/forgot-password"
                 className="text-xs text-primary hover:opacity-80">
                 رمز عبور را فراموش کردی؟
