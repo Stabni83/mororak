@@ -131,7 +131,7 @@ function HeroSection() {
         </Reveal>
 
         {/* تصویر کاراکتر — بدون قاب، بدون پس‌زمینه متفاوت */}
-        <Reveal delay={150} className="flex-shrink-0 w-80 lg:w-[30rem]">
+        <Reveal delay={150} className="shrink-0 w-80 lg:w-[30rem]">
           <Image
             src="/svg/student-character.svg"
             alt="کاراکتر درسخون مرورک"
@@ -211,7 +211,7 @@ function CoursesSection() {
                            transition-all duration-150 group"
               >
                 <div className="w-9 h-9 bg-primary/8 rounded-lg flex items-center
-                                justify-center text-primary flex-shrink-0">
+                                justify-center text-primary shrink-0">
                   <Icon size={18} strokeWidth={2.2} />
                 </div>
                 <div>
@@ -262,7 +262,7 @@ function SampleQuestion() {
                         }`}
                     >
                       <span className={`w-6 h-6 rounded flex items-center justify-center
-                                      text-xs font-bold flex-shrink-0
+                                      text-xs font-bold shrink-0
                                       ${isCorrect ? "bg-success text-white" : "border border-border text-text-muted"}`}>
                         {letters[i]}
                       </span>

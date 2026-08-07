@@ -54,7 +54,7 @@ export default function AboutPage() {
           <div className="bg-surface border border-border rounded-md p-4 flex
                           items-center gap-4 mb-6">
             <div className="w-10 h-10 bg-primary/8 text-primary rounded-lg
-                            flex items-center justify-center flex-shrink-0">
+                            flex items-center justify-center shrink-0">
               <Mail size={18} strokeWidth={2.2} />
             </div>
             <div className="flex-1">
