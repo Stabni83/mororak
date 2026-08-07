@@ -4,13 +4,10 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface CodeBlockProps {
-  // کد برنامه
   code: string;
 
-  // زبان برنامه‌نویسی — برای نمایش در header
   language?: string;
 
-  // عنوان اختیاری
   title?: string;
 
   className?: string;
@@ -22,14 +19,11 @@ export default function CodeBlock({
   title,
   className,
 }: CodeBlockProps) {
-  // state برای کپی کردن کد
-  // وقتی کاربر کپی می‌کند متن دکمه تغییر می‌کند
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
     await navigator.clipboard.writeText(code);
     setCopied(true);
-    // بعد از ۲ ثانیه به حالت اولیه برمی‌گردد
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -55,9 +49,7 @@ export default function CodeBlock({
       <pre
         className={cn(
           "p-4 overflow-x-auto",
-          // پس‌زمینه تیره — کد روی زمینه تاریک خواناتر است
           "bg-gray-950 text-green-300",
-          // کد همیشه LTR است حتی در صفحه RTL
           "direction-ltr text-left",
           "text-sm leading-relaxed"
         )}

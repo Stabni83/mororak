@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/context/SidebarContext";
-import { SUBJECT_LABELS, type Subject } from "@/types";
+import { SUBJECT_LABELS, SUBJECTS, type SubjectItem } from "@/types";
+import { api } from "@/lib/api";
 import Logo from "@/components/ui/Logo";
 import {
   Home as HomeIcon,
@@ -13,6 +14,7 @@ import {
   FileText,
   ChevronDown,
   LayoutDashboard,
+  Bookmark,
 } from "lucide-react";
 
 interface NavItem {
@@ -25,17 +27,23 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "صفحه خانه", href: "/", icon: HomeIcon },
   { label: "داشبورد", href: "/dashboard", icon: LayoutDashboard },
-  { label: "سوالات", href: "/dashboard/questions", icon: HelpCircle, hasCategories: true },
+  { label: "آزمون‌ها", href: "/dashboard/exams", icon: HelpCircle, hasCategories: true },
   { label: "جزوات", href: "/dashboard/notes", icon: FileText, hasCategories: true },
+  { label: "ذخیره‌شده‌ها", href: "/dashboard/saved", icon: Bookmark },
 ];
 
-const subjectList: Subject[] = ["algorithm", "data-structure", "os", "network", "database"];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { isOpen, close } = useSidebar();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const fallbackSubjects: SubjectItem[] = SUBJECTS.map((slug, position) => ({ id: position + 1, slug, name: SUBJECT_LABELS[slug], position, is_active: true }));
+  const [subjects, setSubjects] = useState<SubjectItem[]>(fallbackSubjects);
+
+  useEffect(() => {
+    api.catalog.subjects().then((items) => { if (items?.length) setSubjects(items); }).catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     navItems.forEach((item) => {
@@ -49,7 +57,7 @@ export default function Sidebar() {
     setExpanded((prev) => ({ ...prev, [href]: !prev[href] }));
   }
 
-  function goToSubject(basePath: string, subject: Subject | "all") {
+  function goToSubject(basePath: string, subject: string | "all") {
     const query = subject === "all" ? "" : `?subject=${subject}`;
     router.push(`${basePath}${query}`);
     close();
@@ -134,14 +142,14 @@ export default function Sidebar() {
                       >
                         همه دروس
                       </button>
-                      {subjectList.map((subject) => (
+                      {subjects.map((subject) => (
                         <button
-                          key={subject}
-                          onClick={() => goToSubject(item.href, subject)}
+                          key={subject.slug}
+                          onClick={() => goToSubject(item.href, subject.slug)}
                           className="text-right px-3 py-1.5 rounded text-xs text-text-secondary
                                      hover:text-primary hover:bg-primary/5 transition-colors"
                         >
-                          {SUBJECT_LABELS[subject]}
+                          {subject.name}
                         </button>
                       ))}
                     </div>

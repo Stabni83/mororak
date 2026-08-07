@@ -1,5 +1,3 @@
-// Landing Page — صفحه اصلی سایت
-// این صفحه Server Component نبود چون انیمیشن اسکرول نیاز به "use client" دارد
 "use client";
 
 import Link from "next/link";
@@ -8,6 +6,9 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Reveal from "@/components/ui/Reveal";
 import { SUBJECT_LABELS, type Subject } from "@/types";
+import { api } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { LogOut, ClipboardCheck, FileText, ArrowLeft } from "lucide-react";
 import {
   Brain,
   NotebookPen,
@@ -20,7 +21,6 @@ import {
 } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 
-// ─── داده‌های استاتیک ─────────────────────────
 const features = [
   {
     icon: Brain,
@@ -49,7 +49,6 @@ const popularSubjects: { subject: Subject; icon: typeof Sigma; count: number }[]
   { subject: "network", icon: Network, count: 28 },
 ];
 
-// ─── Navbar ───────────────────────────────────
 function Navbar() {
   return (
     <nav className="bg-surface/80 backdrop-blur-md border-b border-border
@@ -92,7 +91,6 @@ function Navbar() {
   );
 }
 
-// ─── Hero Section ─────────────────────────────
 function HeroSection() {
   return (
     <section className="px-6 lg:px-12 py-20 lg:py-28 overflow-hidden">
@@ -151,7 +149,6 @@ function HeroSection() {
   );
 }
 
-// ─── Features Section ─────────────────────────
 function FeaturesSection() {
   return (
     <section className="px-6 lg:px-12 py-16 bg-surface border-y border-border">
@@ -189,7 +186,6 @@ function FeaturesSection() {
   );
 }
 
-// ─── Courses Section ──────────────────────────
 function CoursesSection() {
   return (
     <section className="px-6 lg:px-12 py-16">
@@ -234,7 +230,6 @@ function CoursesSection() {
   );
 }
 
-// ─── نمونه سوال ───────────────────────────────
 function SampleQuestion() {
   return (
     <section className="px-6 lg:px-12 py-16 bg-surface border-y border-border">
@@ -297,7 +292,6 @@ function SampleQuestion() {
   );
 }
 
-// ─── CTA Section ──────────────────────────────
 function CTASection() {
   return (
     <section className="px-6 lg:px-12 py-20">
@@ -316,8 +310,118 @@ function CTASection() {
   );
 }
 
-// ─── صفحه اصلی ────────────────────────────────
+function AuthenticatedHome({ user, onLogout }: { user: any; onLogout: () => void }) {
+  const firstName = String(user?.name || "دانشجو").split(" ")[0];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <nav className="bg-surface/80 backdrop-blur-md border-b border-border sticky top-0 z-50 px-6 lg:px-12">
+        <div className="max-w-6xl mx-auto flex items-center justify-between h-14">
+          <Link href="/" className="flex items-center gap-2">
+            <Logo size="sm" />
+            <span className="text-base font-bold text-primary">مرورک</span>
+          </Link>
+          <div className="hidden md:flex items-center gap-6">
+            <Link href="/dashboard" className="text-sm text-text-secondary hover:text-primary transition-colors">داشبورد</Link>
+            <Link href="/dashboard/exams" className="text-sm text-text-secondary hover:text-primary transition-colors">آزمون‌ها</Link>
+            <Link href="/dashboard/notes" className="text-sm text-text-secondary hover:text-primary transition-colors">جزوات</Link>
+            <Link href="/dashboard/questions" className="text-sm text-text-secondary hover:text-primary transition-colors">سوالات</Link>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline text-xs text-text-secondary max-w-32 truncate">{user?.name || user?.email}</span>
+            <button
+              onClick={onLogout}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <LogOut size={15} />
+              خروج
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main>
+        <section className="px-6 lg:px-12 py-16 lg:py-20">
+          <div className="max-w-6xl mx-auto">
+            <div className="rounded-2xl border border-border bg-surface p-7 lg:p-10 shadow-card">
+              <Badge variant="primary" className="mb-4">فضای یادگیری شخصی شما</Badge>
+              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+                <div className="max-w-2xl">
+                  <h1 className="text-3xl lg:text-4xl font-extrabold leading-tight mb-4">
+                    خوش برگشتی، {firstName}
+                  </h1>
+                  <p className="text-sm lg:text-base text-text-secondary leading-8">
+                    اینجا نقطه شروع مرور امروزته. به‌جای جست‌وجوی پراکنده، مستقیم وارد تمرین، آزمون یا جزوه‌ای شو که می‌خواهی روی آن کار کنی.
+                  </p>
+                </div>
+                <Link href="/dashboard/exams" className="inline-flex items-center justify-center gap-2 bg-primary text-white rounded-xl px-5 py-3 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0">
+                  شروع یک آزمون
+                  <ArrowLeft size={16} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 lg:px-12 pb-16">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-xl font-bold mb-6">ادامه یادگیری</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <Link href="/dashboard/exams" className="group rounded-xl border border-border bg-surface p-6 hover:border-primary/30 hover:shadow-hover transition-all">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4"><ClipboardCheck size={20} /></div>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">آزمون‌ها</h3>
+                <p className="text-xs text-text-secondary leading-6">آزمون تمرینی یا زمان‌دار انتخاب کن و نتیجه‌ات را ثبت کن.</p>
+              </Link>
+              <Link href="/dashboard/notes" className="group rounded-xl border border-border bg-surface p-6 hover:border-primary/30 hover:shadow-hover transition-all">
+                <div className="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center mb-4"><FileText size={20} /></div>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">جزوات</h3>
+                <p className="text-xs text-text-secondary leading-6">مطالب را مرور کن و موارد مهم را برای دسترسی سریع ذخیره کن.</p>
+              </Link>
+              <Link href="/dashboard/questions" className="group rounded-xl border border-border bg-surface p-6 hover:border-primary/30 hover:shadow-hover transition-all">
+                <div className="w-10 h-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center mb-4"><Brain size={20} /></div>
+                <h3 className="font-bold mb-2 group-hover:text-primary transition-colors">سوالات</h3>
+                <p className="text-xs text-text-secondary leading-6">با Active Recall نقاط ضعف خودت را پیدا کن و پاسخ تشریحی را ببین.</p>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 lg:px-12 py-16 bg-surface border-y border-border">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-xl font-bold mb-3">مرور مؤثر، نه مرور بیشتر</h2>
+            <p className="text-sm text-text-secondary leading-7">
+              ابتدا مفهوم را از جزوه مرور کن، بعد بدون نگاه‌کردن پاسخ بده، و در پایان پاسخ تشریحی را بررسی کن. نتیجه آزمون‌ها هم برای سنجش پیشرفتت ثبت می‌شود.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
 export default function HomePage() {
+  const [user, setUser] = useState<any>(null);
+  const [checkedAuth, setCheckedAuth] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem("access_token")) {
+      setCheckedAuth(true);
+      return;
+    }
+    api.auth.me()
+      .then(setUser)
+      .catch(() => localStorage.removeItem("access_token"))
+      .finally(() => setCheckedAuth(true));
+  }, []);
+
+  if (!checkedAuth) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
+  if (user) {
+    return <AuthenticatedHome user={user} onLogout={() => { api.auth.logout(); setUser(null); }} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />

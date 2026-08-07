@@ -56,7 +56,6 @@ export default function SignupPage() {
         localStorage.removeItem("access_token");
       }
 
-      // ارسال اطلاعات به بک‌اند
       const registerData = {
         name: form.name.trim(),
         email: form.email.trim(),
@@ -67,7 +66,6 @@ export default function SignupPage() {
 
       await api.auth.register(registerData);
 
-      // لاگین خودکار بعد از ثبت‌نام موفق
       await api.auth.login(form.email.trim(), form.password);
 
       router.push("/dashboard");

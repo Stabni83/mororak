@@ -1,4 +1,3 @@
-// client/src/app/dashboard/(dashboard)/notes/[id]/page.tsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -6,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import { Clock, Download, Bookmark, ArrowRight, Highlighter, FileText } from "lucide-react";
+import { Clock, Download, Bookmark, ArrowRight, Highlighter, FileText, Save, Check } from "lucide-react";
 import { api } from "@/lib/api";
 
 export default function NoteReaderPage() {
@@ -16,10 +15,10 @@ export default function NoteReaderPage() {
 
   const [note, setNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   const todayStr = new Date().toISOString().slice(0, 10);
 
-  // تایمر مطالعه (بازیابی از لوکال استوریج برای جلوگیری از صفر شدن با رفرش)
   const [seconds, setSeconds] = useState(() => {
     if (typeof window === "undefined") return 0;
     const savedData = localStorage.getItem(`study_time_${noteId}_${todayStr}`);
@@ -29,7 +28,6 @@ export default function NoteReaderPage() {
   const [isActive, setIsActive] = useState(true);
   const [targetMinutes, setTargetMinutes] = useState<number | null>(null);
 
-  // نوت‌ها و هایلایت‌ها
   const [personalNote, setPersonalNote] = useState("");
   const [highlights, setHighlights] = useState<string[]>([]);
   const [isSaved, setIsSaved] = useState(false);
@@ -37,19 +35,23 @@ export default function NoteReaderPage() {
   const secondsRef = useRef(seconds);
   secondsRef.current = seconds;
 
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [noteSavedMessage, setNoteSavedMessage] = useState(false);
+
   useEffect(() => {
     async function fetchNote() {
       if (!noteId) return;
       try {
-        const notesList = await api.notes.getAll();
-        if (Array.isArray(notesList)) {
-          const found = notesList.find((n: any) => Number(n.id) === noteId);
-          setNote(found || null);
-        } else if (notesList && typeof notesList === "object") {
-          setNote(notesList);
-        }
+        const [noteData, personalData] = await Promise.all([
+          api.notes.get(noteId),
+          api.notes.personalNote(noteId),
+        ]);
+        setNote(noteData || null);
+        setIsSaved(Boolean(noteData?.is_saved));
+        setPersonalNote(personalData?.content || "");
       } catch (err: any) {
         console.error("Error fetching note:", err);
+        setLoadError(err?.message || "خطا در دریافت جزوه");
       } finally {
         setLoading(false);
       }
@@ -57,7 +59,36 @@ export default function NoteReaderPage() {
     fetchNote();
   }, [noteId]);
 
-  // ارسال زمان مطالعه به سرور هنگام ترک صفحه یا بستن (هر 1 دقیقه و موقع Unmount)
+  const handleToggleSave = async () => {
+    try {
+      const updated = await api.notes.toggleSave(noteId);
+      setIsSaved(Boolean(updated?.is_saved));
+    } catch (err: any) {
+      console.error("Failed to save note:", err);
+    }
+  };
+
+  const handleSavePersonalNote = async () => {
+    try {
+      setNoteSaving(true);
+      await api.notes.savePersonalNote(noteId, personalNote);
+      setNoteSavedMessage(true);
+      window.setTimeout(() => setNoteSavedMessage(false), 1800);
+    } catch (err: any) {
+      console.error("Failed to save personal note:", err);
+    } finally {
+      setNoteSaving(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!noteId || loading) return;
+    const timer = window.setTimeout(() => {
+      void api.notes.savePersonalNote(noteId, personalNote).catch((err) => console.error("Failed to autosave personal note:", err));
+    }, 800);
+    return () => window.clearTimeout(timer);
+  }, [personalNote, noteId, loading]);
+
   useEffect(() => {
     const saveToDatabase = async () => {
       if (secondsRef.current > 0 && api.users?.logStudyTime) {
@@ -81,7 +112,6 @@ export default function NoteReaderPage() {
     };
   }, [noteId, todayStr]);
 
-  // مدیریت تایمر و ذخیره محلی ثانیه‌ها
   useEffect(() => {
     let interval: any = null;
     if (isActive && noteId) {
@@ -89,7 +119,7 @@ export default function NoteReaderPage() {
         setSeconds((prev) => {
           const nextVal = prev + 1;
           const finalVal = nextVal >= 86400 ? 0 : nextVal; // ریست خودکار پس از 24 ساعت
-          
+
           localStorage.setItem(`study_time_${noteId}_${todayStr}`, String(finalVal));
 
           if (targetMinutes && finalVal >= targetMinutes * 60) {
@@ -133,6 +163,12 @@ export default function NoteReaderPage() {
   };
 
   if (loading) return <div className="p-10 text-center">در حال بارگذاری جزوه...</div>;
+  if (loadError) return (
+    <div className="p-10 max-w-xl mx-auto text-center">
+      <p className="text-sm font-semibold text-red-600 mb-3">{loadError}</p>
+      <Button variant="outline" size="sm" onClick={() => router.back()}>بازگشت</Button>
+    </div>
+  );
   if (!note) return <div className="p-10 text-center">جزوه یافت نشد.</div>;
 
   return (
@@ -152,8 +188,8 @@ export default function NoteReaderPage() {
                 {String(Math.floor((seconds % 3600) / 60)).padStart(2, "0")}:
                 {String(seconds % 60).padStart(2, "0")}
               </span>
-              <button 
-                onClick={() => setIsActive(!isActive)} 
+              <button
+                onClick={() => setIsActive(!isActive)}
                 className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-semibold ml-2"
               >
                 {isActive ? "توقف" : "ادامه"}
@@ -162,7 +198,7 @@ export default function NoteReaderPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <select 
+            <select
               onChange={(e) => setTargetMinutes(e.target.value ? Number(e.target.value) : null)}
               className="text-xs border border-border rounded-lg px-2 py-1.5 bg-background"
             >
@@ -176,10 +212,10 @@ export default function NoteReaderPage() {
               <Download size={14} /> دانلود فایل
             </Button>
 
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setIsSaved(!isSaved)}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void handleToggleSave()}
               className={isSaved ? "border-primary text-primary" : ""}
             >
               <Bookmark size={14} fill={isSaved ? "currentColor" : "none"} /> ذخیره
@@ -188,7 +224,7 @@ export default function NoteReaderPage() {
         </Card>
 
         <Card className="mb-6">
-          <div 
+          <div
             onMouseUp={handleHighlightSelection}
             className="prose max-w-none text-sm leading-loose text-text select-text"
           >
@@ -218,9 +254,16 @@ export default function NoteReaderPage() {
             value={personalNote}
             onChange={(e) => setPersonalNote(e.target.value)}
             placeholder="برداشت‌ها یا نکات مهم خود را اینجا بنویسید..."
-            rows={3}
+            rows={5}
             className="w-full border border-border rounded-lg p-3 text-sm bg-background focus:outline-none focus:border-primary resize-none"
           />
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <span className="text-[11px] text-text-muted">یادداشت به‌صورت خودکار هم ذخیره می‌شود.</span>
+            <Button variant="primary" size="sm" onClick={() => void handleSavePersonalNote()} disabled={noteSaving}>
+              {noteSavedMessage ? <Check size={14} /> : <Save size={14} />}
+              {noteSaving ? "در حال ذخیره..." : noteSavedMessage ? "ذخیره شد" : "ذخیره یادداشت"}
+            </Button>
+          </div>
         </Card>
       </div>
     </div>

@@ -1,14 +1,13 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/context/SidebarContext";
 import Logo from "@/components/ui/Logo";
 import {
   LayoutDashboard,
-  FileText,
-  Settings,
+  ClipboardList,
   ArrowRight,
 } from "lucide-react";
 
@@ -20,12 +19,12 @@ interface NavItem {
 
 const adminNavItems: NavItem[] = [
   { label: "داشبورد مدیریت", href: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "مدیریت جزوات و سوالات", href: "/admin/notes", icon: FileText },
-  { label: "تنظیمات سیستم", href: "/admin/settings", icon: Settings },
+  { label: "مدیریت محتوا و آزمون", href: "/admin/dashboard?tab=exam", icon: ClipboardList },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { isOpen, close } = useSidebar();
 
   return (
@@ -54,7 +53,10 @@ export default function AdminSidebar() {
         <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
           {adminNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isExamTab = searchParams.get("tab") === "exam";
+            const isActive = item.href.includes("?")
+              ? pathname === "/admin/dashboard" && isExamTab
+              : pathname === item.href && !isExamTab;
 
             return (
               <Link

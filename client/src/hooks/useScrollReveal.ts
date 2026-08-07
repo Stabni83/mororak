@@ -16,7 +16,7 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          observer.disconnect(); 
+          observer.disconnect();
         }
       },
       {

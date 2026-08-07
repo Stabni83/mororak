@@ -1,4 +1,3 @@
-// صفحه درباره ما
 "use client";
 
 import Link from "next/link";
@@ -21,11 +20,11 @@ export default function AboutPage() {
 
         {/* لوگو و عنوان */}
       <Reveal className="text-center mb-10">
-        
+
         <Logo size="lg" className="mx-auto mb-4" />
-        
+
         <h1 className="text-2xl font-extrabold mb-2">درباره مرورک</h1>
-        
+
         <p className="text-sm text-text-secondary leading-relaxed">
           پلتفرم فارسی یادگیری مهندسی کامپیوتر بر پایه Active Recall
         </p>

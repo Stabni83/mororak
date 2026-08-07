@@ -1,13 +1,10 @@
 import { cn } from "@/lib/utils";
 
 interface ProgressBarProps {
-  // value — عدد بین ۰ تا ۱۰۰
   value: number;
 
-  // showLabel — نشان دادن درصد کنار نوار
   showLabel?: boolean;
 
-  // color — رنگ نوار پیشرفت
   color?: "primary" | "success" | "secondary";
 
   className?: string;
@@ -25,7 +22,6 @@ export default function ProgressBar({
   color = "primary",
   className,
 }: ProgressBarProps) {
-  // مطمئن می‌شویم value بین ۰ و ۱۰۰ باشد
   const clampedValue = Math.min(100, Math.max(0, value));
 
   return (
@@ -40,7 +36,6 @@ export default function ProgressBar({
             "h-full rounded-full transition-all duration-500",
             colorStyles[color]
           )}
-          // width را inline می‌گذاریم چون Tailwind نمی‌تواند مقادیر داینامیک بسازد
           style={{ width: `${clampedValue}%` }}
         />
       </div>

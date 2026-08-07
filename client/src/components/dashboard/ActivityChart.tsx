@@ -28,11 +28,10 @@ export default function ActivityChart({ data }: ActivityChartProps) {
     { day: "جمعه", questions: 0, study_minutes: 0 },
   ];
 
-  // محاسبه امتیاز دقیق: هر 5 دقیقه مطالعه = 1 امتیاز، هر 10 سوال = 1 امتیاز
   const chartData = rawData.map(item => {
     const mins = Number(item.study_minutes) || 0;
     const quests = Number(item.questions) || 0;
-    
+
     const studyScore = mins / 5;
     const questionScore = quests / 10;
     const totalScore = Math.round(studyScore + questionScore);
@@ -52,7 +51,7 @@ export default function ActivityChart({ data }: ActivityChartProps) {
         <div>
           <h2 className="text-sm font-bold text-text">فعالیت هفته</h2>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-4 text-xs select-none">
           <button
             type="button"

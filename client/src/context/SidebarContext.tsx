@@ -4,24 +4,20 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 export interface SidebarSubItem {
   label: string;
-  // وقتی کلیک می‌شود این تابع صدا زده می‌شود (مثلاً تغییر activeSubject در صفحه)
   onClick: () => void;
   isActive?: boolean;
   count?: number;
 }
 
 interface SidebarContextValue {
-  // باز/بسته بودن سایدبار در موبایل
   isOpen: boolean;
   open: () => void;
   close: () => void;
   toggle: () => void;
 
-  // زیرمنوی فعلی — هر صفحه (notes/questions) با useEffect این را ست می‌کند
   subItems: SidebarSubItem[] | null;
   setSubItems: (items: SidebarSubItem[] | null) => void;
 
-  // کدام لینک اصلی سایدبار باز/expand شده — معمولاً هم‌نام مسیر فعلی
   expandedHref: string | null;
   setExpandedHref: (href: string | null) => void;
 }
@@ -70,6 +66,5 @@ export function useSidebarSubItems(href: string, items: SidebarSubItem[]) {
     return () => {
       setSubItems(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [href, JSON.stringify(items.map((i) => ({ l: i.label, a: i.isActive, c: i.count })))]);
 }

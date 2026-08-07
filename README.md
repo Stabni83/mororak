@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# مرورک
 
-## Getting Started
+مرورک یک پلتفرم یادگیری فعال برای جزوه، سؤال، تمرین و آزمون است.
 
-First, run the development server:
+## Backend
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```powershell
+cd backend
+python -m pip install -r requirements.txt
+cd ..
+python -m backend.migrate
+python -m uvicorn backend.main:app --reload --port 8000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+متغیرهای محیطی در `backend/.env.example` قرار دارند.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Frontend
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```powershell
+cd client
+npm install
+npm run dev
+```
 
-## Learn More
+در حالت عادی Frontend درخواست‌های `/api/*` را از طریق rewrite داخلی Next.js به Backend روی `http://127.0.0.1:8000` می‌فرستد؛ بنابراین مشکل CORS/`Failed to fetch` ناشی از تفاوت origin رخ نمی‌دهد. در صورت نیاز می‌توان مقصد Backend را با `MORORAK_API_URL` تغییر داد.
 
-To learn more about Next.js, take a look at the following resources:
+## ساختار
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Backend بر اساس domain به مدل، schema، service و router تفکیک شده است.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Frontend مسئولیت‌ها را بین app، components، types و lib تقسیم می‌کند و CSS فعلی پروژه در `client/src/styles/globals.css` حفظ شده است.
 
-## Deploy on Vercel
+## آزمون
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`practice` برای حل آزاد و یادگیری است.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`timed` برای آزمون زمان‌دار است و نتیجه شامل درصد، صحیح، غلط، بی‌پاسخ و زمان ثبت‌شده است.
+
+کاربر می‌تواند جزوه، سؤال و آزمون را به‌صورت مستقل برای حساب خودش ذخیره کند.
+
+## سطح سختی
+
+- `beginner`
+- `intermediate`
+- `advanced`

@@ -2,19 +2,13 @@
 
 import { cn } from "@/lib/utils";
 
-// InputHTMLAttributes یعنی همه props استاندارد input مثل
-// type, placeholder, value, onChange, disabled را هم قبول می‌کنیم
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  // label — متنی که بالای input نشان داده می‌شود
   label?: string;
 
-  // error — پیغام خطا زیر input (مثلاً "ایمیل نامعتبر است")
   error?: string;
 
-  // hint — راهنمای کوچک زیر input (مثلاً "حداقل ۸ کاراکتر")
   hint?: string;
 
-  // icon — آیکون داخل input (اختیاری)
   icon?: React.ReactNode;
 }
 
@@ -27,8 +21,6 @@ export default function Input({
   id,
   ...props   // بقیه props مثل type, placeholder, onChange
 }: InputProps) {
-  // اگر id نداشتیم از name استفاده می‌کنیم
-  // id برای اتصال label به input لازم است
   const inputId = id ?? props.name;
 
   return (
@@ -57,20 +49,16 @@ export default function Input({
         <input
           id={inputId}
           className={cn(
-            // استایل پایه
             "w-full h-10 rounded-md border text-sm",
             "bg-background text-text",
             "placeholder:text-text-muted",
             "transition-all duration-150",
             "focus:outline-none focus:ring-2",
 
-            // فاصله راست اگر icon داریم
             icon ? "pr-9 pl-3" : "px-3",
 
-            // حالت عادی — border خاکستری، focus آبی
             !error && "border-border focus:border-primary focus:ring-primary/10",
 
-            // حالت خطا — border قرمز
             error && "border-danger focus:border-danger focus:ring-danger/10",
 
             className

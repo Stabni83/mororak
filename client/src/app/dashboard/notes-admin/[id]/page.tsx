@@ -1,4 +1,3 @@
-// src/app/dashboard/notes/[id]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -17,6 +16,7 @@ interface NoteDetail {
   title: string;
   content: string;
   subject: Subject;
+  author?: string;
   created_at?: string;
 }
 
@@ -34,12 +34,10 @@ export default function NoteDetailPage() {
       if (!noteId) return;
       try {
         setLoading(true);
-        // فرض بر این است که api.notes.getById یا مشابه آن وجود دارد، 
-        // در غیر این صورت از متد عمومی get استفاده می‌کنیم
-        const data = (api.notes as any).getById 
+        const data = (api.notes as any).getById
           ? await (api.notes as any).getById(noteId)
           : await (api as any).get?.(`/notes/${noteId}`);
-          
+
         setNote(data);
       } catch (err: any) {
         setError(err.message || "خطا در دریافت اطلاعات جزوه.");
@@ -80,9 +78,9 @@ export default function NoteDetailPage() {
 
   return (
     <div>
-      <Header 
-        title={note.title} 
-        subtitle={SUBJECT_LABELS[note.subject] || "جزوه آموزشی"} 
+      <Header
+        title={note.title}
+        subtitle={`${SUBJECT_LABELS[note.subject] || "جزوه آموزشی"} · نویسنده: ${note.author || "مرورک"}`}
       />
 
       <div className="p-6 max-w-4xl mx-auto">
@@ -107,7 +105,7 @@ export default function NoteDetailPage() {
                 {note.created_at && (
                   <div className="flex items-center gap-1.5 text-xs text-text-muted mt-1">
                     <Calendar size={13} />
-                    <span>تاریخ ایجاد: {new Date(note.created_at).toLocaleDateString("fa-IR")}</span>
+                    <span>تاریخ ایجاد: {new Date(note.created_at).toLocaleDateString("fa-IR")}</span><span className="mx-1">·</span><span>نویسنده: {note.author || "مرورک"}</span>
                   </div>
                 )}
               </div>

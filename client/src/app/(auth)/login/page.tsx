@@ -1,4 +1,3 @@
-// src/app/(auth)/login/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -33,15 +32,12 @@ export default function LoginPage() {
     setErrors({});
 
     try {
-      // ۱. ورود
       const loginRes = await api.auth.login(email, password);
       console.log("Login Response:", loginRes);
 
-      // ۲. گرفتن اطلاعات کاربر
       const user = await api.auth.me();
       console.log("User Info:", user);
 
-      // ۳. بررسی ادمین بودن
       if (user && (user as any).is_admin === true) {
         console.log("Redirecting to Admin Dashboard...");
         router.push("/admin/dashboard");
@@ -49,7 +45,7 @@ export default function LoginPage() {
         console.log("Redirecting to User Dashboard...");
         router.push("/dashboard");
       }
-      
+
       router.refresh();
     } catch (err: any) {
       console.error("Login Error:", err);

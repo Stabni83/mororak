@@ -76,7 +76,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
       </div>
 
       <div className="relative" ref={dropdownRef}>
-        <div 
+        <div
           onClick={() => setDropdownOpen(!dropdownOpen)}
           className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-sm font-bold text-primary cursor-pointer hover:bg-primary/20 transition-colors"
           title={userName || "کاربر"}
