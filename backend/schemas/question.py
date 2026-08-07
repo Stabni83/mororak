@@ -1,4 +1,3 @@
-# backend/schemas/question.py
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional, Any
@@ -13,6 +12,7 @@ class QuestionResponse(BaseModel):
     explanation: str
     code_example: Optional[str] = None
     note_id: Optional[int] = None
+    created_by_id: Optional[int] = None
     is_saved: bool  # اضافه شد
     created_at: datetime
 

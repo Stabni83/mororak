@@ -1,4 +1,3 @@
-# backend/models/question.py
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, JSON, DateTime, Boolean
 from sqlalchemy.sql import func
 from backend.database import Base
@@ -15,5 +14,6 @@ class Question(Base):
     explanation = Column(Text, nullable=False)
     code_example = Column(Text, nullable=True)
     note_id = Column(Integer, ForeignKey("notes.id"), nullable=True)
-    is_saved = Column(Boolean, default=False)  
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    is_saved = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
