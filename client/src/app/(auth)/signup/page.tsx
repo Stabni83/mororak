@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Registration page. Collects name/email/password, calls api.auth.register(), and then logs the new user straight in so they land on the dashboard without a second manual login step.
+ */
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";

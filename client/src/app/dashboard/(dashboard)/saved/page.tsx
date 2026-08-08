@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * "Saved" page: shows the merged feed of every note, question, and exam the current user has bookmarked, most recent first.
+ */
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";

@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Left-hand navigation for the admin area (notes, questions, exams, catalog management).
+ */
 import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";

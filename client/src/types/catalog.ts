@@ -1,3 +1,7 @@
+/**
+ * TypeScript types for the admin-configurable catalog: subjects and dynamic filter definitions, mirroring backend/models/catalog.py.
+ */
+
 export type FilterFieldType = "select" | "multi_select" | "number" | "text" | "boolean";
 export type FilterScope = "exams" | "notes" | "questions" | "all";
 

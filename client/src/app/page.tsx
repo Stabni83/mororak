@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Public landing page shown at "/": introduces the product and links visitors to sign up or log in.
+ */
 import Link from "next/link";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
@@ -97,7 +100,7 @@ function HeroSection() {
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row
                       items-center gap-12">
 
-        {/* متن Hero */}
+
         <Reveal className="flex-1 text-center lg:text-right">
 
           {/* Badge بالای عنوان */}
@@ -105,7 +108,7 @@ function HeroSection() {
             <Badge variant="primary">✦ پلتفرم Active Recall فارسی</Badge>
           </div>
 
-          {/* عنوان اصلی */}
+
           <h1 className="text-3xl lg:text-5xl font-extrabold leading-tight
                          text-text mb-4">
             یه مرور کوچولو<br />
@@ -113,13 +116,13 @@ function HeroSection() {
             قبل امتحان
           </h1>
 
-          {/* توضیح کوتاه */}
+        
           <p className="text-base text-text-secondary leading-relaxed mb-8 max-w-md mx-auto lg:mx-0">
             اگر جزوه‌هات رو خوندی، حالا وقتشه مفاهیم رو با حل سوال، پاسخ تشریحی
             و مرور هوشمند ماندگار کنی.
           </p>
 
-          {/* دکمه‌های CTA */}
+
           <div className="flex gap-3 justify-center lg:justify-start flex-row-reverse">
             <Button variant="primary" size="lg">
               <Link href="/signup">شروع رایگان</Link>
@@ -130,7 +133,7 @@ function HeroSection() {
           </div>
         </Reveal>
 
-        {/* تصویر کاراکتر — بدون قاب، بدون پس‌زمینه متفاوت */}
+
         <Reveal delay={150} className="shrink-0 w-80 lg:w-[30rem]">
           <Image
             src="/svg/student-character.svg"

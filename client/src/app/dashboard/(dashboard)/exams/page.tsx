@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Exam browser: lists published exams with subject/type search and the dynamic, admin-defined filters coming from the catalog API.
+ */
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";

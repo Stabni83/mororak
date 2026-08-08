@@ -1,15 +1,26 @@
+"""Admin-managed catalog: subjects and dynamic filter definitions.
+
+Subjects (e.g. "algorithm", "database") and the filter fields shown on the
+Exams page are not hardcoded in the frontend - they live in the database so
+an admin can add a new subject or filter without a code change/deploy. This
+router seeds sensible defaults on first run and exposes simple CRUD/toggle
+endpoints for admins.
+"""
 import re
 from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+
 from backend.database import get_db
-from backend.models.catalog import SubjectCatalog, FilterDefinition
+from backend.models.catalog import FilterDefinition, SubjectCatalog
 from backend.models.user import User
 from backend.utils.auth import get_current_user
 
 router = APIRouter(prefix="/catalog", tags=["Catalog"])
 
+# Seeded once, only if the subjects table is empty (see seed_catalog below).
 DEFAULT_SUBJECTS = [
     ("algorithm", "الگوریتم"),
     ("data-structure", "ساختمان داده"),
@@ -35,24 +46,40 @@ class FilterCreate(BaseModel):
     scope: str = "exams"
 
 
-def _admin(user: User):
+def _require_admin(user: User) -> None:
     if not user.is_admin:
         raise HTTPException(403, "دسترسی مدیر لازم است")
 
 
-def seed_catalog(db: Session):
+def seed_catalog(db: Session) -> None:
+    """Populate the subjects table with sane defaults on a fresh database."""
     if db.query(SubjectCatalog).count() == 0:
         for index, (slug, name) in enumerate(DEFAULT_SUBJECTS):
             db.add(SubjectCatalog(slug=slug, name=name, position=index, is_active=True))
         db.commit()
 
 
-def _subject_payload(item):
-    return {"id": item.id, "slug": item.slug, "name": item.name, "position": item.position, "is_active": item.is_active}
+def _subject_payload(item: SubjectCatalog) -> dict:
+    return {
+        "id": item.id,
+        "slug": item.slug,
+        "name": item.name,
+        "position": item.position,
+        "is_active": item.is_active,
+    }
 
 
-def _filter_payload(item):
-    return {"id": item.id, "key": item.key, "name": item.name, "field_type": item.field_type, "options": item.options or [], "scope": item.scope, "position": item.position, "is_active": item.is_active}
+def _filter_payload(item: FilterDefinition) -> dict:
+    return {
+        "id": item.id,
+        "key": item.key,
+        "name": item.name,
+        "field_type": item.field_type,
+        "options": item.options or [],
+        "scope": item.scope,
+        "position": item.position,
+        "is_active": item.is_active,
+    }
 
 
 @router.get("/subjects")
@@ -60,48 +87,79 @@ def subjects(include_inactive: bool = False, db: Session = Depends(get_db)):
     query = db.query(SubjectCatalog)
     if not include_inactive:
         query = query.filter(SubjectCatalog.is_active == True)
-    return [_subject_payload(x) for x in query.order_by(SubjectCatalog.position, SubjectCatalog.name).all()]
+    items = query.order_by(SubjectCatalog.position, SubjectCatalog.name).all()
+    return [_subject_payload(item) for item in items]
 
 
 @router.post("/subjects", status_code=201)
-def create_subject(data: SubjectCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _admin(current_user)
+def create_subject(
+    data: SubjectCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(current_user)
+
+    # Normalize into a URL/filter-safe slug: lowercase, letters/digits/-/_ only.
     slug = re.sub(r"[^a-zA-Z0-9_-]+", "-", data.slug.strip().lower()).strip("-")
     if not slug:
         raise HTTPException(422, "شناسه درس معتبر نیست")
+
     if db.query(SubjectCatalog).filter(SubjectCatalog.slug == slug).first():
         raise HTTPException(409, "این درس قبلاً ثبت شده است")
-    max_position = db.query(SubjectCatalog).count()
-    item = SubjectCatalog(slug=slug, name=data.name.strip(), position=max_position, is_active=True)
+
+    # New subjects are appended to the end of the display order.
+    next_position = db.query(SubjectCatalog).count()
+    item = SubjectCatalog(slug=slug, name=data.name.strip(), position=next_position, is_active=True)
     db.add(item)
-    db.commit(); db.refresh(item)
+    db.commit()
+    db.refresh(item)
     return _subject_payload(item)
 
 
 @router.patch("/subjects/{subject_id}")
-def toggle_subject(subject_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _admin(current_user)
+def toggle_subject(
+    subject_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Flip a subject between active/inactive (soft delete, keeps history)."""
+    _require_admin(current_user)
     item = db.query(SubjectCatalog).filter(SubjectCatalog.id == subject_id).first()
     if not item:
         raise HTTPException(404, "درس یافت نشد")
+
     item.is_active = not item.is_active
-    db.commit(); db.refresh(item)
+    db.commit()
+    db.refresh(item)
     return _subject_payload(item)
 
 
 @router.get("/filters")
-def filters(scope: Optional[str] = "exams", include_inactive: bool = False, db: Session = Depends(get_db)):
+def filters(
+    scope: Optional[str] = "exams",
+    include_inactive: bool = False,
+    db: Session = Depends(get_db),
+):
     query = db.query(FilterDefinition)
     if scope and scope != "all":
-        query = query.filter((FilterDefinition.scope == scope) | (FilterDefinition.scope == "all"))
+        # A filter with scope="all" applies everywhere, so always include it.
+        query = query.filter(
+            (FilterDefinition.scope == scope) | (FilterDefinition.scope == "all")
+        )
     if not include_inactive:
         query = query.filter(FilterDefinition.is_active == True)
-    return [_filter_payload(x) for x in query.order_by(FilterDefinition.position, FilterDefinition.name).all()]
+    items = query.order_by(FilterDefinition.position, FilterDefinition.name).all()
+    return [_filter_payload(item) for item in items]
 
 
 @router.post("/filters", status_code=201)
-def create_filter(data: FilterCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _admin(current_user)
+def create_filter(
+    data: FilterCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(current_user)
+
     key = re.sub(r"[^a-zA-Z0-9_-]+", "_", data.key.strip().lower()).strip("_")
     if not key:
         raise HTTPException(422, "کلید فیلتر معتبر نیست")
@@ -109,19 +167,42 @@ def create_filter(data: FilterCreate, current_user: User = Depends(get_current_u
         raise HTTPException(422, "نوع فیلتر نامعتبر است")
     if data.scope not in SCOPES:
         raise HTTPException(422, "محدوده فیلتر نامعتبر است")
-    if db.query(FilterDefinition).filter(FilterDefinition.key == key, FilterDefinition.scope == data.scope).first():
+
+    duplicate = (
+        db.query(FilterDefinition)
+        .filter(FilterDefinition.key == key, FilterDefinition.scope == data.scope)
+        .first()
+    )
+    if duplicate:
         raise HTTPException(409, "این فیلتر قبلاً ثبت شده است")
-    item = FilterDefinition(key=key, name=data.name.strip(), field_type=data.field_type, options=[x.strip() for x in data.options if x.strip()], scope=data.scope, position=db.query(FilterDefinition).count(), is_active=True)
-    db.add(item); db.commit(); db.refresh(item)
+
+    item = FilterDefinition(
+        key=key,
+        name=data.name.strip(),
+        field_type=data.field_type,
+        options=[option.strip() for option in data.options if option.strip()],
+        scope=data.scope,
+        position=db.query(FilterDefinition).count(),
+        is_active=True,
+    )
+    db.add(item)
+    db.commit()
+    db.refresh(item)
     return _filter_payload(item)
 
 
 @router.patch("/filters/{filter_id}")
-def toggle_filter(filter_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    _admin(current_user)
+def toggle_filter(
+    filter_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _require_admin(current_user)
     item = db.query(FilterDefinition).filter(FilterDefinition.id == filter_id).first()
     if not item:
         raise HTTPException(404, "فیلتر یافت نشد")
+
     item.is_active = not item.is_active
-    db.commit(); db.refresh(item)
+    db.commit()
+    db.refresh(item)
     return _filter_payload(item)

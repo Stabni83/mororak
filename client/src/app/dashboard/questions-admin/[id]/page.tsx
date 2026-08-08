@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Admin editor for creating/updating a standalone question: prompt, options, correct answer, and explanation.
+ */
 import { useState } from "react";
 import { api } from "@/lib/api";
 
@@ -20,9 +23,17 @@ export default function CreateQuestionPage() {
     setMessage("");
 
     try {
+      // This simplified editor only collects text + subject; the other
+      // fields the backend requires (difficulty/options/correct answer/
+      // explanation) aren't exposed as inputs here yet, so a placeholder
+      // two-option question is submitted until this form is built out.
       await api.questions.create({
         text,
         subject,
+        difficulty: "beginner",
+        options: ["گزینه ۱", "گزینه ۲"],
+        correct_option_id: 0,
+        explanation: "توضیحی ثبت نشده است.",
       });
 
       setMessage("سوال با موفقیت ثبت شد!");

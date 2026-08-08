@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Wrapper component that fades/slides its children into view as the user scrolls past them, built on top of the useScrollReveal hook.
+ */
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { cn } from "@/lib/utils";
 

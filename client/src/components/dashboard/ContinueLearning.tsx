@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * "Continue where you left off" card on the dashboard, linking back to the user's most recently visited note or exam attempt.
+ */
 import Card from "@/components/ui/Card";
 import ProgressBar from "@/components/ui/ProgressBar";
 import Button from "@/components/ui/Button";

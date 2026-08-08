@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Password-reset request page. Collects the user's email and submits it to the backend so a reset flow can be triggered (or shows a friendly message if that endpoint is not wired up yet).
+ */
 import { useState } from "react";
 import Link from "next/link";
 import Input from "@/components/ui/Input";

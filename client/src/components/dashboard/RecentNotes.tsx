@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Small preview list of the most recently added notes, shown on the dashboard home page.
+ */
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Link from "next/link";

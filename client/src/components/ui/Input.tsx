@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Base text input component with the app's shared label/error/helper-text styling.
+ */
 import { cn } from "@/lib/utils";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {

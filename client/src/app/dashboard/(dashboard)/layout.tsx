@@ -1,3 +1,7 @@
+/**
+ * Shared layout for every /dashboard/* route: renders the persistent Header/Sidebar chrome around whichever page is active.
+ */
+
 import Sidebar from "@/components/layout/Sidebar";
 import { SidebarProvider } from "@/context/SidebarContext";
 

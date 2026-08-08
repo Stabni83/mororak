@@ -1,3 +1,7 @@
+/**
+ * Small colored label used throughout the app for subjects, difficulty levels, and status tags.
+ */
+
 import { cn } from "@/lib/utils";
 
 interface BadgeProps {

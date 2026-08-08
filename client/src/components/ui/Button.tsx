@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Base button component with the app's shared variants (primary/secondary/ghost) and sizes, so every button in the UI looks and behaves consistently.
+ */
 import { cn } from "@/lib/utils";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

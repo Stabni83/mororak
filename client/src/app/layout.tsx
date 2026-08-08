@@ -1,3 +1,7 @@
+/**
+ * Root Next.js layout. Sets global metadata (title/description), loads the Vazirmatn font, and applies the app-wide RTL Persian styling.
+ */
+
 import type { Metadata } from "next";
 import "../styles/globals.css";
 

@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Notes browser: lists notes with subject filtering and free-text search, and shows which notes the current user has bookmarked.
+ */
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";

@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Single standalone-question view: shows the prompt and options, submits the chosen answer, and reveals whether it was correct along with the explanation.
+ */
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";

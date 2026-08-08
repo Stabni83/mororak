@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * React context that stores whether the sidebar is expanded or collapsed, so Header/Sidebar/AdminSidebar can all read and toggle the same state.
+ */
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export interface SidebarSubItem {

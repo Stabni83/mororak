@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Main dashboard home page: progress ring, weekly activity chart, recently visited note/exam shortcuts, and quick links into the rest of the app.
+ */
 import { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Card from "@/components/ui/Card";

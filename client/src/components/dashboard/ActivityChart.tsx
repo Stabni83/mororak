@@ -1,12 +1,15 @@
 "use client";
 
+/**
+ * Bar chart of the last 7 days of study activity (questions answered + minutes studied), fed by the /users/progress endpoint's weekly_activity data.
+ */
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 export interface ActivityItem {
   day: string;
-  questions: number;         // تعداد سوالات
-  study_minutes: number;   // زمان مطالعه به دقیقه
+  questions: number;         
+  study_minutes: number;  
 }
 
 interface ActivityChartProps {

@@ -1,3 +1,7 @@
+/**
+ * Simple horizontal progress bar used for the dashboard's overall-progress indicator.
+ */
+
 import { cn } from "@/lib/utils";
 
 interface ProgressBarProps {

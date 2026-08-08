@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Exam-taking screen for a single exam. Handles both exam modes: untimed practice (instant per-question feedback) and timed exams (countdown plus a single final submission).
+ */
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";

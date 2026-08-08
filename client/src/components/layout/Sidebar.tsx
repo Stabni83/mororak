@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Left-hand navigation for the student dashboard (home, notes, questions, exams, saved items).
+ */
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";

@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Single note reading view. Renders the note content, tracks time spent on the page for the study-time chart, and lets the user keep a private personal note underneath the official content.
+ */
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";

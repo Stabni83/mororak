@@ -1,9 +1,18 @@
+"""Lightweight, hand-written schema migrations for the SQLite database.
+
+There is no Alembic here on purpose - this project is small enough that a
+few "add this column if it does not exist yet" helper functions are easier
+to read and reason about than a full migration framework. ensure_schema()
+is called once, automatically, when the FastAPI app starts (see main.py).
+"""
 from sqlalchemy import inspect, text
-from backend.database import engine, Base
+
 from backend import models
+from backend.database import Base, engine
 
 
 def _columns(table: str):
+    """Return the set of column names that currently exist on `table`."""
     inspector = inspect(engine)
     if table not in inspector.get_table_names():
         return set()
@@ -11,6 +20,12 @@ def _columns(table: str):
 
 
 def ensure_column(table: str, column: str, definition: str):
+    """Add `column` to `table` with SQL `definition` if it is missing.
+
+    This is how we handle old database files created before a field was
+    added to a model - instead of forcing every developer to delete their
+    local mororak.db, we just patch the existing table in place.
+    """
     if table not in inspect(engine).get_table_names():
         return
     if column not in _columns(table):
@@ -19,6 +34,11 @@ def ensure_column(table: str, column: str, definition: str):
 
 
 def ensure_exam_questions_schema():
+    """Upgrade very old exam_questions tables that used a composite primary
+    key instead of a plain auto-increment `id` column. SQLite cannot add a
+    primary key to an existing table, so the only safe option is to rebuild
+    the table from scratch and copy the old rows across.
+    """
     inspector = inspect(engine)
     if "exam_questions" not in inspector.get_table_names():
         return
@@ -81,6 +101,11 @@ def ensure_exam_attempt_schema():
 
 
 def ensure_schema():
+    """Create any missing tables, then patch older tables one column at a
+    time so a database created by an earlier version of the app keeps
+    working after the models change. Finally, seed the default subject list
+    if the catalog table is still empty (first run).
+    """
     Base.metadata.create_all(bind=engine)
     ensure_column("questions", "created_by_id", "INTEGER")
     ensure_column("notes", "author", "VARCHAR NOT NULL DEFAULT 'مرورک'")
@@ -98,7 +123,10 @@ def ensure_schema():
     Base.metadata.create_all(bind=engine)
     from backend.models.catalog import SubjectCatalog
     from sqlalchemy.orm import Session
+
     with Session(engine) as db:
+        # Only seed on a brand-new database. If an admin has already edited
+        # or removed default subjects, we must not silently re-add them.
         if db.query(SubjectCatalog).count() == 0:
             defaults = [("algorithm", "الگوریتم"), ("data-structure", "ساختمان داده"), ("os", "سیستم‌عامل"), ("network", "شبکه"), ("database", "پایگاه داده")]
             for index, (slug, name) in enumerate(defaults):

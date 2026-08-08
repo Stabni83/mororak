@@ -1,3 +1,7 @@
+/**
+ * Shared Mororak wordmark/icon component, so the logo only needs to be updated in one place across the whole app.
+ */
+
 import { cn } from "@/lib/utils";
 
 interface LogoProps {

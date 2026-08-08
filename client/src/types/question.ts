@@ -1,3 +1,7 @@
+/**
+ * TypeScript types for standalone questions and answers, mirroring backend/schemas/question.py.
+ */
+
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 export interface QuestionOption { id: number; text: string; }
 export interface Question { id: number; subject: string; difficulty: Difficulty; text: string; options: QuestionOption[] | string[]; correct_option_id: number; explanation: string; code_example?: string | null; note_id?: number | null; is_saved?: boolean; created_at?: string; }

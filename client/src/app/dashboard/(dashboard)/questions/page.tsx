@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Question bank browser: lists standalone questions with subject/difficulty filters and bookmark status.
+ */
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";

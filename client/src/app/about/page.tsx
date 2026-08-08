@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Public marketing page that explains what Mororak is and how the Active Recall study method works, for visitors who have not created an account yet.
+ */
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";

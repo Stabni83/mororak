@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Admin editor for creating/updating a note's title, subject, and Markdown content.
+ */
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";

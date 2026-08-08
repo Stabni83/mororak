@@ -1,5 +1,13 @@
-from pydantic import BaseModel
+"""Response shape for the (legacy) simple progress summary.
+
+The dashboard now mostly uses the richer payload built directly in
+routers/progress.py, but this schema is kept for any client still expecting
+the original, simpler shape.
+"""
 from typing import List
+
+from pydantic import BaseModel
+
 
 class UserProgressResponse(BaseModel):
     total_notes: int

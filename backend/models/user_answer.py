@@ -1,10 +1,14 @@
-from sqlalchemy import Column, Integer, ForeignKey, Boolean, Text, DateTime
-from sqlalchemy.sql import func
+"""Records of a user answering a standalone question, plus question bookmarks."""
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
 from backend.database import Base
 
 
 class UserAnswer(Base):
+    """One submitted answer to a Question (standalone practice or exam)."""
+
     __tablename__ = "user_answers"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -16,7 +20,7 @@ class UserAnswer(Base):
     selected_option_id = Column(Integer, nullable=False)
     is_correct = Column(Boolean, nullable=False)
     answered_at = Column(DateTime(timezone=True), server_default=func.now())
-    personal_note = Column(Text, nullable=True)
+    personal_note = Column(Text, nullable=True)  # optional note the user leaves for themselves
 
     user = relationship("User", backref="answers")
     question = relationship("Question")
@@ -24,6 +28,8 @@ class UserAnswer(Base):
 
 
 class SavedQuestion(Base):
+    """A user's bookmark on a standalone question."""
+
     __tablename__ = "saved_questions"
 
     id = Column(Integer, primary_key=True, index=True)

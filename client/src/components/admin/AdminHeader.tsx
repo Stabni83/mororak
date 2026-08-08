@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Top bar shown on every admin page: page title plus a shortcut back to the regular student dashboard.
+ */
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Monitor } from "lucide-react";

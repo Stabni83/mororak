@@ -1,7 +1,10 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+"""The User table: everyone who can log in, plus their admin flag."""
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
 from backend.database import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -10,7 +13,7 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
-    is_admin = Column(Boolean, default=False)
+    is_admin = Column(Boolean, default=False)  # admins can create notes/questions/exams
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     study_times = relationship("StudyTime", back_populates="user", cascade="all, delete-orphan")

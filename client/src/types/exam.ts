@@ -1,3 +1,7 @@
+/**
+ * TypeScript types for exams, exam questions, and exam attempts, mirroring backend/models/exam.py and backend/schemas/exam.py.
+ */
+
 import type { Question } from "./question";
 
 export type ExamType = "practice" | "timed";

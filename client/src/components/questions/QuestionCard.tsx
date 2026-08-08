@@ -1,4 +1,7 @@
 "use client";
+/**
+ * Reusable card for rendering one multiple-choice question: prompt, options, selection state, and (once answered) the correct-answer highlight and explanation.
+ */
 import { Bookmark, CheckCircle2, XCircle } from "lucide-react";
 import type { Question } from "@/types/question";
 export default function QuestionCard({ question, selected, answered, onSelect, onSave }: { question: Question; selected?: number | null; answered?: boolean; onSelect?: (id: number) => void; onSave?: () => void }) {

@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Shared layout for every /admin/* route: wraps the page in the sidebar context provider and renders the persistent AdminSidebar navigation.
+ */
 import { SidebarProvider } from "@/context/SidebarContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 

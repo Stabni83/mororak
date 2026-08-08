@@ -5,6 +5,7 @@ Some existing installations import these functions from
 implementation so old routers cannot accidentally use an unfixed version.
 """
 from backend.services.exam_service import (  # noqa: F401
+    answer_practice,
     create_exam,
     list_exams,
     get_exam,

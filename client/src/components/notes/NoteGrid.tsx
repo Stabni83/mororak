@@ -1,4 +1,7 @@
 "use client";
+/**
+ * Responsive grid of NoteCard-style tiles, used by the notes list and saved-items pages to render a set of notes consistently.
+ */
 import Link from "next/link";
 import type { Note } from "@/types/note";
 import { FileText, Bookmark } from "lucide-react";

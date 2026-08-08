@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Admin-only workspace for creating notes, questions, and exams, and for managing the subject/filter catalog. Access is gated by the current user's is_admin flag from the auth context.
+ */
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Header from "@/components/layout/Header";

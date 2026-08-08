@@ -1,3 +1,7 @@
+/**
+ * Barrel file that re-exports every type module, plus the shared SUBJECTS constant used as a fallback before the catalog API has loaded.
+ */
+
 export * from "./user";
 export * from "./note";
 export * from "./question";
@@ -8,3 +12,4 @@ export const SUBJECT_LABELS: Record<Subject, string> = { algorithm: "الگور�
 export const DIFFICULTY_LABELS = { beginner: "مقدماتی", intermediate: "متوسط", advanced: "پیشرفته" } as const;
 
 export * from "./catalog";
+export * from "./api";

@@ -1,6 +1,9 @@
-from pydantic import BaseModel
+"""Response/request shapes for standalone questions and answer submissions."""
 from datetime import datetime
-from typing import List, Optional, Any
+from typing import Any, List, Optional
+
+from pydantic import BaseModel
+
 
 class QuestionResponse(BaseModel):
     id: int
@@ -13,15 +16,17 @@ class QuestionResponse(BaseModel):
     code_example: Optional[str] = None
     note_id: Optional[int] = None
     created_by_id: Optional[int] = None
-    is_saved: bool  # اضافه شد
+    is_saved: bool  # computed per-request from the SavedQuestion table
     created_at: datetime
 
     class Config:
         from_attributes = True
 
+
 class AnswerSubmit(BaseModel):
     selected_option_id: int
     personal_note: Optional[str] = None
+
 
 class AnswerResponse(BaseModel):
     id: int

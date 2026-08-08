@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Login page. Submits email/password to the backend, stores the returned JWT via the api.auth.login() helper, and redirects the user into the dashboard once authentication succeeds.
+ */
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";

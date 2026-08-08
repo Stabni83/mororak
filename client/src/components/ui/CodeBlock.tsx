@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Syntax-highlighted code block used inside notes and question explanations that include a code example.
+ */
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 

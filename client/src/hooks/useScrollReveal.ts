@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Small hook that uses an IntersectionObserver to report when an element has scrolled into the viewport, powering the Reveal animation component.
+ */
 import { useEffect, useRef, useState } from "react";
 
 export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(

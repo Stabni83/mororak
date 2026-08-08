@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Base card container with the app's standard padding, border, and background styling, reused by almost every panel in the UI.
+ */
 import { cn } from "@/lib/utils";
 
 interface CardProps {

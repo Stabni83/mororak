@@ -1,21 +1,41 @@
+"""Business logic for exams: listing, creating, and both ways of taking one.
+
+An exam can be one of two types, and they behave quite differently:
+  - "practice": untimed, one attempt row is reused across the whole session,
+    and every answer is graded and returned immediately (see answer_practice).
+  - "timed": has a countdown, the whole exam is submitted at once at the end
+    (see start_attempt / submit_attempt), and grading happens in one pass.
+
+Keeping this logic in a service module (instead of directly in the router)
+lets routers/exams.py stay a thin, easy-to-read HTTP layer.
+"""
 from datetime import datetime, timezone
+
 from fastapi import HTTPException
-from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
-from backend.models.exam import Exam, ExamQuestion, ExamAttempt
+from sqlalchemy.orm import Session, joinedload
+
+from backend.models.catalog import FilterDefinition
+from backend.models.exam import Exam, ExamAttempt, ExamQuestion
 from backend.models.question import Question
 from backend.models.saved import SavedExam
 from backend.models.user_answer import UserAnswer
-from backend.models.catalog import FilterDefinition
 
 VALID_TYPES = {"practice", "timed"}
 
 
 def _now():
+    """Current UTC time, used consistently so all timestamps stay comparable."""
     return datetime.now(timezone.utc)
 
 
 def _question_payload(question: Question, include_answer: bool = False, is_saved: bool = False):
+    """Serialize a Question for the exam-detail response.
+
+    include_answer controls whether correct_option_id is revealed. It is
+    kept hidden for a timed exam that has "show answers immediately" turned
+    off, so a student cannot see the correct answer before submitting.
+    """
     payload = {
         "id": question.id,
         "subject": question.subject,
@@ -33,6 +53,8 @@ def _question_payload(question: Question, include_answer: bool = False, is_saved
 
 
 def _attempt_payload(attempt: ExamAttempt):
+    """Serialize an ExamAttempt into the shape the frontend's exam-taking
+    screen and results screen both expect."""
     return {
         "id": attempt.id,
         "exam_id": attempt.exam_id,
@@ -49,27 +71,40 @@ def _attempt_payload(attempt: ExamAttempt):
 
 
 def create_exam(db: Session, data, user):
+    """Create a new exam from a list of existing questions.
+
+    Several checks run before anything is written to the database: the
+    exam type must be valid, a timed exam must have a time limit, no
+    question can be duplicated inside the exam, every referenced question
+    must actually exist, the admin must own each question (or it must be a
+    legacy question with no owner), and every question's subject must match
+    the exam's subject so exams stay topically consistent.
+    """
     if not user.is_admin:
         raise HTTPException(403, "دسترسی مدیر لازم است")
     if data.exam_type not in VALID_TYPES:
         raise HTTPException(422, "نوع آزمون نامعتبر است")
     if data.exam_type == "timed" and not data.time_limit_seconds:
         raise HTTPException(422, "آزمون زمان‌دار باید زمان داشته باشد")
+
     question_ids = [item.question_id for item in data.questions]
     if not question_ids:
         raise HTTPException(422, "آزمون باید حداقل یک سؤال داشته باشد")
     if len(question_ids) != len(set(question_ids)):
         raise HTTPException(422, "یک سؤال نمی‌تواند دوبار در آزمون باشد")
+
     questions = db.query(Question).filter(Question.id.in_(question_ids)).all()
     if len(questions) != len(question_ids):
         raise HTTPException(404, "یکی از سؤال‌ها یافت نشد")
     question_map = {question.id: question for question in questions}
+
     unauthorized = [
         question_id for question_id in question_ids
         if question_map[question_id].created_by_id not in (None, user.id)
     ]
     if unauthorized:
         raise HTTPException(403, "فقط سؤال‌های خودتان یا سؤال‌های قدیمی قابل استفاده در آزمون هستند")
+
     mismatched = [
         question_id for question_id in question_ids
         if question_map[question_id].subject != data.subject
@@ -103,6 +138,8 @@ def create_exam(db: Session, data, user):
 
 
 def _safe_float(value):
+    """Convert value to float, returning None instead of raising on bad input.
+    Used everywhere we compare a stored filter value that might not be numeric."""
     try:
         return float(value)
     except (TypeError, ValueError):
@@ -110,6 +147,9 @@ def _safe_float(value):
 
 
 def list_exams(db: Session, user_id: int, subject=None, exam_type=None, saved=None, search=None, dynamic_filters=None):
+    """List published exams, applying the standard filters plus any
+    admin-defined dynamic filters (see models/catalog.py FilterDefinition).
+    """
     query = db.query(Exam).options(joinedload(Exam.questions)).filter(Exam.is_published == True)
     if subject and subject != "all":
         query = query.filter(Exam.subject == subject)
@@ -121,6 +161,10 @@ def list_exams(db: Session, user_id: int, subject=None, exam_type=None, saved=No
 
     exams = query.order_by(Exam.created_at.desc()).all()
 
+    # Dynamic filters live in each exam's filter_values JSON column, so they
+    # cannot be filtered with a plain SQL WHERE clause - we apply them in
+    # Python after loading the (already subject/type/search-filtered) exams.
+    # First pass: exact-match filters (select / multi_select / number / text / boolean).
     for key, expected in (dynamic_filters or {}).items():
         if expected in (None, "", "all") or key.endswith("__min") or key.endswith("__max"):
             continue
@@ -146,6 +190,8 @@ def list_exams(db: Session, user_id: int, subject=None, exam_type=None, saved=No
         else:
             exams = [x for x in exams if str((x.filter_values or {}).get(key, "")) == str(expected)]
 
+    # Second pass: range filters, sent by the frontend as "<key>__min" and
+    # "<key>__max" query params for any filter defined with field_type="number".
     for key, expected in (dynamic_filters or {}).items():
         if not (key.endswith("__min") or key.endswith("__max")) or expected in (None, ""):
             continue
@@ -191,6 +237,7 @@ def list_exams(db: Session, user_id: int, subject=None, exam_type=None, saved=No
 
 
 def get_exam(db: Session, exam_id: int, user_id: int):
+    """Full exam detail, including every question, used by the exam-taking page."""
     exam = db.query(Exam).options(
         joinedload(Exam.questions).joinedload(ExamQuestion.question)
     ).filter(Exam.id == exam_id, Exam.is_published == True).first()
@@ -228,7 +275,8 @@ def get_exam(db: Session, exam_id: int, user_id: int):
 
 
 def toggle_save(db: Session, exam_id: int, user_id: int):
-    # Kept only for old clients. New UI saves individual questions, never exams.
+    """Bookmark/unbookmark an exam. Kept only for old clients - the current
+    UI saves individual questions, never whole exams."""
     exam = db.query(Exam).filter(Exam.id == exam_id).first()
     if not exam:
         raise HTTPException(404, "آزمون یافت نشد")
@@ -244,6 +292,12 @@ def toggle_save(db: Session, exam_id: int, user_id: int):
 
 
 def start_attempt(db: Session, exam_id: int, user_id: int):
+    """Begin (or resume) an attempt at an exam.
+
+    For a practice exam there is no real "start" - we just reuse the most
+    recent practice attempt if one exists, since practice sessions have no
+    finish/end lifecycle and can be revisited indefinitely.
+    """
     exam = db.query(Exam).filter(Exam.id == exam_id, Exam.is_published == True).first()
     if not exam:
         raise HTTPException(404, "آزمون یافت نشد")
@@ -268,6 +322,8 @@ def start_attempt(db: Session, exam_id: int, user_id: int):
         db.refresh(attempt)
         return _attempt_payload(attempt)
 
+    # Timed exam: reuse an in-progress attempt if the user refreshed the
+    # page or navigated away without finishing, otherwise start a fresh one.
     existing = db.query(ExamAttempt).filter(
         ExamAttempt.user_id == user_id,
         ExamAttempt.exam_id == exam_id,
@@ -297,6 +353,9 @@ def start_attempt(db: Session, exam_id: int, user_id: int):
     try:
         db.commit()
     except IntegrityError:
+        # Two near-simultaneous requests both tried to create the first
+        # attempt for this user/exam; the loser just falls back to reading
+        # the attempt the winner created, instead of returning an error.
         db.rollback()
         existing = db.query(ExamAttempt).filter(
             ExamAttempt.user_id == user_id,
@@ -311,6 +370,7 @@ def start_attempt(db: Session, exam_id: int, user_id: int):
 
 
 def _get_exam_for_attempt(db: Session, exam_id: int):
+    """Load an exam with its questions eagerly joined, for the answer/submit paths."""
     exam = db.query(Exam).options(
         joinedload(Exam.questions).joinedload(ExamQuestion.question)
     ).filter(Exam.id == exam_id, Exam.is_published == True).first()
@@ -320,6 +380,9 @@ def _get_exam_for_attempt(db: Session, exam_id: int):
 
 
 def _upsert_exam_user_answer(db: Session, user_id: int, attempt_id: int, question_id: int, selected_option_id: int, is_correct: bool):
+    """Create or update the UserAnswer row for one question inside one
+    attempt, so re-answering the same question in an attempt updates the
+    existing record instead of creating duplicate history."""
     row = db.query(UserAnswer).filter(
         UserAnswer.user_id == user_id,
         UserAnswer.question_id == question_id,
@@ -340,12 +403,21 @@ def _upsert_exam_user_answer(db: Session, user_id: int, attempt_id: int, questio
 
 
 def _calculate_attempt(exam, submitted):
+    """Grade a full timed-exam submission in one pass.
+
+    Returns (correct_count, wrong_count, unanswered_count, per_question
+    results, final score as a 0-100 percentage weighted by each question's
+    points).
+    """
     correct = wrong = unanswered = 0
     answer_results = {}
     total_points = sum(float(eq.points or 1) for eq in exam.questions) or 1
     earned = 0.0
     valid_question_ids = {eq.question_id for eq in exam.questions}
 
+    # First, pre-fill every submitted answer as "incorrect" so that even a
+    # question we can't fully process below still shows up with the
+    # student's selected option in the results.
     for raw_key, raw_value in submitted.items():
         try:
             qid = int(raw_key)
@@ -356,6 +428,8 @@ def _calculate_attempt(exam, submitted):
             continue
         answer_results[str(qid)] = {"selected_option_id": selected, "is_correct": False}
 
+    # Now walk the exam's real question list and do the actual grading;
+    # this also catches any question the student left unanswered.
     for eq in exam.questions:
         key = str(eq.question_id)
         selected = submitted.get(key)
@@ -375,6 +449,9 @@ def _calculate_attempt(exam, submitted):
 
 
 def answer_practice(db: Session, exam_id: int, user_id: int, data):
+    """Grade a single answer inside a practice exam and update the running
+    attempt totals immediately, so the UI can show live progress instead of
+    waiting for a final submit step (practice exams have no submit step)."""
     exam = _get_exam_for_attempt(db, exam_id)
     if exam.exam_type != "practice":
         raise HTTPException(422, "این آزمون زمان‌دار است و باید از مسیر ارسال آزمون استفاده شود")
@@ -383,6 +460,8 @@ def answer_practice(db: Session, exam_id: int, user_id: int, data):
     if question is None:
         raise HTTPException(404, "این سؤال متعلق به آزمون نیست")
 
+    # Reuse the existing practice attempt if one is already running;
+    # practice mode is a continuous session, not a one-shot submission.
     attempt = db.query(ExamAttempt).filter(
         ExamAttempt.user_id == user_id,
         ExamAttempt.exam_id == exam_id,
@@ -412,6 +491,8 @@ def answer_practice(db: Session, exam_id: int, user_id: int, data):
     answers = dict(attempt.answers or {})
     selected = int(data.selected_option_id)
     started = attempt.started_at
+    # SQLite can return naive datetimes even though the column is declared
+    # timezone-aware; normalize to UTC before doing arithmetic on it.
     if started.tzinfo is None:
         started = started.replace(tzinfo=timezone.utc)
     attempt.duration_seconds = max(0, int((now - started).total_seconds()))
@@ -442,6 +523,11 @@ def answer_practice(db: Session, exam_id: int, user_id: int, data):
 
 
 def submit_attempt(db: Session, exam_id: int, attempt_id: int, user_id: int, data):
+    """Finish a timed exam attempt: grade every answer at once, detect a
+    time-out, persist per-question results, and mark the attempt as done.
+    Submitting an already-finished attempt is a no-op that just returns the
+    existing result, so a duplicate click can't corrupt the score.
+    """
     exam = _get_exam_for_attempt(db, exam_id)
     if exam.exam_type != "timed":
         raise HTTPException(422, "آزمون تمرینی نیاز به پایان آزمون ندارد")
@@ -463,6 +549,8 @@ def submit_attempt(db: Session, exam_id: int, attempt_id: int, user_id: int, dat
     duration = max(0, int((now - started).total_seconds()))
     timed_out = exam.time_limit_seconds is not None and duration >= exam.time_limit_seconds
     if timed_out:
+        # Cap the recorded duration at the exam's own time limit so the
+        # results screen never shows more time than the exam actually allowed.
         duration = exam.time_limit_seconds
 
     submitted = {}

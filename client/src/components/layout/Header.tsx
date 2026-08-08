@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Top navigation bar for the student-facing dashboard: page title, search, and the logged-in user menu.
+ */
 import { useState, useRef, useEffect } from "react";
 import { useSidebar } from "@/context/SidebarContext";
 import { Menu, LogOut, Shield } from "lucide-react";
