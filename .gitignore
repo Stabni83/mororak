@@ -18,7 +18,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -36,6 +35,8 @@ env/
 ENV/
 backend/venv/
 backend/env/
+backend/venv/lib/
+backend/env/lib/
 
 # Databases
 *.db
@@ -56,3 +57,5 @@ backend/.env
 # OS generated files
 .DS_Store
 Thumbs.db
+# User-uploaded files
+/uploads/
