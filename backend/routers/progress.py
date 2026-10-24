@@ -3,7 +3,7 @@ and shortcuts back to whatever the user was doing most recently.
 """
 from datetime import date, datetime, timedelta
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
@@ -11,6 +11,7 @@ from backend.models.catalog import SubjectCatalog
 from backend.models.exam import Exam, ExamAttempt
 from backend.models.note import Note
 from backend.models.question import Question
+from backend.models.resource import Resource
 from backend.models.study_time import StudyTime
 from backend.models.user import User
 from backend.models.user_answer import UserAnswer
@@ -138,4 +139,85 @@ def get_user_progress(current_user: User = Depends(get_current_user), db: Sessio
         "suggested_subjects": all_active_subjects[:3],
         "weekly_activity": weekdays,
         "recent_visits": recent_visits,
+    }
+
+
+@router.get("/study-stats")
+def get_study_stats(
+    days: int = Query(7, ge=1, le=90),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Study time per day, split by subject (درس), for the last `days` days.
+
+    Time logged against a Note counts toward that note's subject; time logged
+    against an uploaded file counts toward the subject the user filed it under
+    (or "none" if they didn't pick one).
+    """
+    today = date.today()
+    start = today - timedelta(days=days - 1)
+
+    logs = db.query(StudyTime).filter(StudyTime.user_id == current_user.id).all()
+
+    note_ids = {log.note_id for log in logs if log.note_id}
+    resource_ids = {log.resource_id for log in logs if log.resource_id}
+    note_subject = (
+        {row.id: row.subject for row in db.query(Note.id, Note.subject).filter(Note.id.in_(note_ids)).all()}
+        if note_ids else {}
+    )
+    resource_subject = (
+        {row.id: row.subject for row in db.query(Resource.id, Resource.subject).filter(Resource.id.in_(resource_ids)).all()}
+        if resource_ids else {}
+    )
+    subject_names = {item.slug: item.name for item in db.query(SubjectCatalog).all()}
+
+    per_day = {}  # "YYYY-MM-DD" -> {subject_slug: seconds}
+    subject_totals = {}
+    for log in logs:
+        try:
+            log_date = datetime.strptime(log.date.strip(), "%Y-%m-%d").date()
+        except (AttributeError, ValueError):
+            continue
+        if log_date < start or log_date > today:
+            continue
+
+        if log.note_id:
+            slug = note_subject.get(log.note_id)
+        elif log.resource_id:
+            slug = resource_subject.get(log.resource_id)
+        else:
+            slug = None
+        slug = slug or "none"
+
+        seconds = max(0, log.seconds or 0)
+        day_bucket = per_day.setdefault(log_date.isoformat(), {})
+        day_bucket[slug] = day_bucket.get(slug, 0) + seconds
+        subject_totals[slug] = subject_totals.get(slug, 0) + seconds
+
+    day_rows = []
+    for offset in range(days):
+        day = start + timedelta(days=offset)
+        subjects = per_day.get(day.isoformat(), {})
+        day_rows.append({
+            "date": day.isoformat(),
+            "total_seconds": sum(subjects.values()),
+            "subjects": subjects,
+        })
+
+    subject_rows = [
+        {
+            "slug": slug,
+            "name": "بدون درس" if slug == "none" else subject_names.get(slug, slug),
+            "total_seconds": total,
+        }
+        for slug, total in sorted(subject_totals.items(), key=lambda kv: kv[1], reverse=True)
+        if total > 0
+    ]
+
+    total_seconds = sum(row["total_seconds"] for row in day_rows)
+    return {
+        "days": day_rows,
+        "subjects": subject_rows,
+        "total_seconds": total_seconds,
+        "active_days": sum(1 for row in day_rows if row["total_seconds"] > 0),
     }
