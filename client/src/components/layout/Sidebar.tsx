@@ -18,6 +18,7 @@ import {
   ChevronDown,
   LayoutDashboard,
   Bookmark,
+  Library,
 } from "lucide-react";
 
 interface NavItem {
@@ -32,6 +33,7 @@ const navItems: NavItem[] = [
   { label: "داشبورد", href: "/dashboard", icon: LayoutDashboard },
   { label: "آزمون‌ها", href: "/dashboard/exams", icon: HelpCircle, hasCategories: true },
   { label: "جزوات", href: "/dashboard/notes", icon: FileText, hasCategories: true },
+  { label: "کتابخانه‌ی من", href: "/dashboard/library", icon: Library },
   { label: "ذخیره‌شده‌ها", href: "/dashboard/saved", icon: Bookmark },
 ];
 

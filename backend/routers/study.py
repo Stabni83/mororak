@@ -29,18 +29,20 @@ def log_study_time(
             StudyTime.user_id == current_user.id,
             StudyTime.date == data.date,
             StudyTime.note_id == data.note_id,
+            StudyTime.resource_id == data.resource_id,
         )
         .first()
     )
 
     if existing:
-        # Same user/date/note combo already logged today -> just update it.
+        # Same user/date/note(or resource) combo already logged today -> just update it.
         existing.seconds = data.seconds
     else:
         db.add(
             StudyTime(
                 user_id=current_user.id,
                 note_id=data.note_id,
+                resource_id=data.resource_id,
                 date=data.date,
                 seconds=data.seconds,
             )

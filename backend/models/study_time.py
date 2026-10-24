@@ -15,6 +15,7 @@ class StudyTime(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     note_id = Column(Integer, ForeignKey("notes.id"), nullable=True)
+    resource_id = Column(Integer, ForeignKey("resources.id"), nullable=True)
     date = Column(String, nullable=False)  # stored as "YYYY-MM-DD" for simple string comparisons
     seconds = Column(Integer, default=0, nullable=False)
 
