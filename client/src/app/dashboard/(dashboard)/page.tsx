@@ -8,19 +8,17 @@ import Header from "@/components/layout/Header";
 import Card from "@/components/ui/Card";
 import Link from "next/link";
 import { SUBJECT_LABELS, type Subject } from "@/types";
-import ActivityChart from "@/components/dashboard/ActivityChart";
+import StudyTimeChart from "@/components/dashboard/StudyTimeChart";
 import ContinueLearning from "@/components/dashboard/ContinueLearning";
 import { api } from "@/lib/api";
 import { BookOpen, ClipboardCheck, ArrowLeft } from "lucide-react";
 
 export default function DashboardPage() {
   const [progressData, setProgressData] = useState<any>(null);
-  const [activityData, setActivityData] = useState<any[]>([]);
 
   useEffect(() => {
     api.users.getProgress().then((data) => {
       setProgressData(data);
-      setActivityData(data?.weekly_activity || []);
     }).catch((err) => console.error("Error fetching dashboard data:", err));
   }, []);
 
@@ -30,7 +28,7 @@ export default function DashboardPage() {
   return <div>
     <Header title="داشبورد" subtitle="خوش آمدید" />
     <div className="p-6 max-w-5xl mx-auto">
-      <ActivityChart data={activityData} />
+      <StudyTimeChart />
       <ContinueLearning progress={progressData} />
 
       <Card className="shadow-card mb-4">

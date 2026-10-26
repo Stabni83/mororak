@@ -11,3 +11,4 @@ from backend.models.exam import Exam, ExamQuestion, ExamAttempt
 from backend.models.saved import SavedNote, SavedExam
 from backend.models.personal_note import UserNote
 from backend.models.catalog import SubjectCatalog, FilterDefinition
+from backend.models.resource import Resource

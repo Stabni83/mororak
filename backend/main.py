@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend import models  # noqa: F401  (import registers all models with Base)
 from backend.migrate import ensure_schema
-from backend.routers import auth, catalog, exams, notes, progress, questions, saved, study
+from backend.routers import auth, catalog, exams, notes, progress, questions, resources, saved, study
 
 # Create tables / apply lightweight migrations before the app starts serving.
 ensure_schema()
@@ -38,6 +38,7 @@ for router in (
     exams.router,
     saved.router,
     catalog.router,
+    resources.router,
 ):
     app.include_router(router, prefix="/api")
 

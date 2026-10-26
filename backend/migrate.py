@@ -117,6 +117,7 @@ def ensure_schema():
         connection.execute(text("UPDATE exams SET author = 'مرورک' WHERE author IS NULL OR TRIM(author) = ''"))
     ensure_column("exams", "show_answers_immediately", "BOOLEAN NOT NULL DEFAULT 1")
     ensure_column("exams", "filter_values", "JSON NOT NULL DEFAULT '{}'")
+    ensure_column("study_times", "resource_id", "INTEGER")
     ensure_exam_attempt_schema()
     ensure_column("exam_attempts", "last_activity_at", "DATETIME")
     ensure_exam_questions_schema()

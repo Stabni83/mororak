@@ -6,6 +6,7 @@ export * from "./user";
 export * from "./note";
 export * from "./question";
 export * from "./exam";
+export * from "./resource";
 export const SUBJECTS = ["algorithm", "data-structure", "os", "network", "database"] as const;
 export type Subject = (typeof SUBJECTS)[number];
 export const SUBJECT_LABELS: Record<Subject, string> = { algorithm: "الگوریتم", "data-structure": "ساختمان داده", os: "سیستم‌عامل", network: "شبکه", database: "پایگاه داده" };
@@ -13,3 +14,4 @@ export const DIFFICULTY_LABELS = { beginner: "مقدماتی", intermediate: "م
 
 export * from "./catalog";
 export * from "./api";
+export * from "./stats";

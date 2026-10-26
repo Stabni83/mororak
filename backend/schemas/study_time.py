@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 class StudyTimeCreate(BaseModel):
     note_id: Optional[int] = None
+    resource_id: Optional[int] = None
     date: str  # "YYYY-MM-DD"
     seconds: int
 
